@@ -1,0 +1,10 @@
+# Backend specific ignores
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info/
+.env
+static/
+temp/
+*.ply
