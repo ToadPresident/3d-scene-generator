@@ -10,14 +10,18 @@ interface PromptPanelProps {
   generationTime?: number;
 }
 
-// Example prompts optimized for 3D Gaussian Splatting
-// Best scenes: deep perspective, corridors, tunnels, clear depth layers
+// Example prompts - visually interesting scenes with depth
 const EXAMPLE_PROMPTS = [
-  "Long underground subway tunnel with glowing lights receding into distance, perspective view",
-  "Cathedral interior with tall pillars and vaulted ceiling, deep perspective, photorealistic",
-  "Abandoned warehouse corridor with dramatic lighting, depth fog, cinematic",
-  "Japanese temple entrance with torii gates in a row, strong perspective",
-  "Spaceship hangar bay with distant stars visible through opening, volumetric lighting",
+  "Neon-lit cyberpunk alley at night with rain reflections and holographic signs",
+  "Gothic cathedral interior with tall pillars, stained glass windows, and candlelight",
+  "Ancient library with towering bookshelves and magical floating lights",
+  "Underwater temple ruins with sunbeams filtering through the water",
+  "Steam-powered Victorian greenhouse with exotic plants and brass machinery",
+  "Mystical forest path with glowing mushrooms and fireflies at twilight",
+  "Abandoned space station corridor with flickering emergency lights",
+  "Japanese zen garden with cherry blossoms and stone lanterns at sunset",
+  "Crystal cave with glowing minerals and underground waterfall",
+  "Cozy wizard's study with floating books and magical artifacts",
 ];
 
 export default function PromptPanel({
@@ -78,7 +82,7 @@ export default function PromptPanel({
         <div className="mb-6">
           <p className="text-xs text-zinc-500 mb-2">Try these examples:</p>
           <div className="flex flex-wrap gap-2">
-            {EXAMPLE_PROMPTS.slice(0, 3).map((example, i) => (
+            {EXAMPLE_PROMPTS.map((example, i) => (
               <button
                 key={i}
                 type="button"
@@ -87,7 +91,7 @@ export default function PromptPanel({
                            rounded-full text-zinc-400 hover:text-white
                            transition-colors duration-200 truncate max-w-[200px]"
               >
-                {example.slice(0, 30)}...
+                {example.slice(0, 25)}...
               </button>
             ))}
           </div>
@@ -143,10 +147,11 @@ export default function PromptPanel({
         <div className="mt-auto pt-6 border-t border-border">
           <h3 className="text-sm font-medium text-zinc-300 mb-2">Controls</h3>
           <ul className="text-xs text-zinc-500 space-y-1">
-            <li>• Click on the 3D view to enable first-person mode</li>
-            <li>• Use WASD to move around</li>
-            <li>• Move mouse to look around</li>
-            <li>• Press ESC to exit first-person mode</li>
+            <li>• <b>WASD</b> - Move forward/left/back/right</li>
+            <li>• <b>Q/E</b> - Move down/up</li>
+            <li>• <b>Left-drag</b> - Rotate view</li>
+            <li>• <b>Scroll</b> - Zoom in/out</li>
+            <li>• Click canvas first to enable keyboard</li>
           </ul>
         </div>
       </form>
