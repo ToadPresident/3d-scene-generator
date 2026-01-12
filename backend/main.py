@@ -23,13 +23,14 @@ from services.sharp_service import generate_3d_scene
 STATIC_DIR = Path(__file__).parent / "static"
 TEMP_DIR = Path(__file__).parent / "temp"
 
+# Create directories immediately (needed for StaticFiles mount)
+STATIC_DIR.mkdir(exist_ok=True)
+TEMP_DIR.mkdir(exist_ok=True)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan - setup and teardown."""
-    # Startup: Create necessary directories
-    STATIC_DIR.mkdir(exist_ok=True)
-    TEMP_DIR.mkdir(exist_ok=True)
     print("✅ Backend ready - directories initialized")
     
     yield  # Application runs
