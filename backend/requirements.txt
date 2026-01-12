@@ -4,3 +4,5 @@ google-genai>=1.0.0
 python-multipart>=0.0.18
 pillow>=11.0.0
 pydantic>=2.10.0
+plyfile>=1.0.0
+numpy>=1.26.0
