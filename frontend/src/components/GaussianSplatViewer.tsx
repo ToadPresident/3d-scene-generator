@@ -227,22 +227,36 @@ function GaussianSplatMesh({ plyUrl }: { plyUrl: string }) {
           // Apply rotation to convert
           points.rotation.x = Math.PI;
           
-          // Scale and center the scene
-          splatData.geometry.computeBoundingBox();
-          const box = splatData.geometry.boundingBox;
-          if (box) {
-            const center = new THREE.Vector3();
-            box.getCenter(center);
-            points.position.sub(center);
+          // Scale and center the scene (with error handling)
+          try {
+            splatData.geometry.computeBoundingBox();
+            const box = splatData.geometry.boundingBox;
             
-            // Auto-scale to fit in view
-            const size = new THREE.Vector3();
-            box.getSize(size);
-            const maxDim = Math.max(size.x, size.y, size.z);
-            if (maxDim > 5) {
-              const scale = 5 / maxDim;
-              points.scale.setScalar(scale);
+            if (box && 
+                Number.isFinite(box.min.x) && Number.isFinite(box.max.x) &&
+                Number.isFinite(box.min.y) && Number.isFinite(box.max.y) &&
+                Number.isFinite(box.min.z) && Number.isFinite(box.max.z)) {
+              
+              const center = new THREE.Vector3();
+              box.getCenter(center);
+              
+              if (Number.isFinite(center.x) && Number.isFinite(center.y) && Number.isFinite(center.z)) {
+                points.position.sub(center);
+              }
+              
+              // Auto-scale to fit in view
+              const size = new THREE.Vector3();
+              box.getSize(size);
+              const maxDim = Math.max(size.x, size.y, size.z);
+              if (Number.isFinite(maxDim) && maxDim > 5) {
+                const scale = 5 / maxDim;
+                points.scale.setScalar(scale);
+              }
+            } else {
+              console.warn("Bounding box contains invalid values, skipping centering");
             }
+          } catch (e) {
+            console.warn("Failed to compute bounding box:", e);
           }
 
           groupRef.current.add(points);
@@ -284,10 +298,15 @@ function parseGaussianSplatPly(buffer: ArrayBuffer): { geometry: THREE.BufferGeo
     }
   }
 
-  if (vertexCount === 0) return null;
+  if (vertexCount === 0) {
+    console.error("PLY parse error: No vertices found");
+    return null;
+  }
+
+  console.log(`Parsing PLY: ${vertexCount} vertices, ${properties.length} properties`);
 
   // Detect property indices
-  const hasRgb = properties.some(p => p.includes(" red") || p.includes(" diffuse_red"));
+  const hasRgb = properties.some(p => p.includes(" red") || p.includes(" diffuse_red") || p.includes(" f_dc_0"));
   const hasOpacity = properties.some(p => p.includes(" opacity") || p.includes(" alpha"));
   const hasScale = properties.some(p => p.includes(" scale_0") || p.includes(" scale"));
 
@@ -296,41 +315,90 @@ function parseGaussianSplatPly(buffer: ArrayBuffer): { geometry: THREE.BufferGeo
   const sizes: number[] = [];
   const opacities: number[] = [];
 
+  let validVertices = 0;
+  let skippedVertices = 0;
+
   // Parse vertex data
   for (let i = headerEnd; i < headerEnd + vertexCount && i < lines.length; i++) {
-    const parts = lines[i].trim().split(/\s+/).map(parseFloat);
-    if (parts.length < 3 || isNaN(parts[0])) continue;
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const parts = line.split(/\s+/).map(parseFloat);
+    
+    // Skip if not enough data or position is invalid
+    if (parts.length < 3) {
+      skippedVertices++;
+      continue;
+    }
+    
+    // Check for NaN or Infinity in position
+    const x = parts[0];
+    const y = parts[1];
+    const z = parts[2];
+    
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
+      skippedVertices++;
+      continue;
+    }
 
-    // Position (always first 3)
-    positions.push(parts[0], parts[1], parts[2]);
+    // Position
+    positions.push(x, y, z);
+    validVertices++;
 
-    // Colors (typically at index 3-5 or later)
-    if (hasRgb && parts.length >= 6) {
-      // Check if values are 0-255 or 0-1 range
-      const r = parts[3] > 1 ? parts[3] / 255 : parts[3];
-      const g = parts[4] > 1 ? parts[4] / 255 : parts[4];
-      const b = parts[5] > 1 ? parts[5] / 255 : parts[5];
-      colors.push(r, g, b);
+    // Colors - SHARP uses f_dc_0, f_dc_1, f_dc_2 for spherical harmonics
+    if (parts.length >= 6) {
+      let r = parts[3];
+      let g = parts[4];
+      let b = parts[5];
+      
+      // Handle spherical harmonics (f_dc values are typically small, need sigmoid transform)
+      if (Math.abs(r) < 1 && Math.abs(g) < 1 && Math.abs(b) < 1) {
+        // SH to RGB conversion (simplified)
+        r = 0.5 + r * 0.5;
+        g = 0.5 + g * 0.5;
+        b = 0.5 + b * 0.5;
+      } else if (r > 1 || g > 1 || b > 1) {
+        // Normalize from 0-255 range
+        r = r / 255;
+        g = g / 255;
+        b = b / 255;
+      }
+      
+      colors.push(
+        Math.max(0, Math.min(1, r)),
+        Math.max(0, Math.min(1, g)),
+        Math.max(0, Math.min(1, b))
+      );
     } else {
-      colors.push(0.8, 0.8, 0.8); // Default gray
+      colors.push(0.7, 0.7, 0.7); // Default gray
     }
 
     // Size from scale property or default
     if (hasScale && parts.length >= 10) {
-      const scale = Math.abs(parts[6]) + Math.abs(parts[7]) + Math.abs(parts[8]);
-      sizes.push(Math.max(0.01, Math.min(0.5, scale / 3)));
+      const scales = [parts[6], parts[7], parts[8]].map(s => Math.abs(s || 0));
+      const avgScale = scales.reduce((a, b) => a + b, 0) / 3;
+      sizes.push(Math.max(0.005, Math.min(0.2, avgScale * 0.1)));
     } else {
-      sizes.push(0.02);
+      sizes.push(0.015);
     }
 
     // Opacity
-    if (hasOpacity && parts.length > 6) {
-      const opacityIdx = hasRgb ? 6 : 3;
-      const op = parts[opacityIdx] > 1 ? parts[opacityIdx] / 255 : parts[opacityIdx];
+    if (hasOpacity && parts.length > 9) {
+      // Opacity is usually after scale values
+      const opacityRaw = parts[9];
+      // Convert logit to opacity: sigmoid(x) = 1 / (1 + exp(-x))
+      const op = 1 / (1 + Math.exp(-opacityRaw));
       opacities.push(Math.max(0.1, Math.min(1.0, op)));
     } else {
-      opacities.push(0.8);
+      opacities.push(0.7);
     }
+  }
+
+  console.log(`PLY parsed: ${validVertices} valid vertices, ${skippedVertices} skipped`);
+
+  if (validVertices === 0) {
+    console.error("PLY parse error: No valid vertices after filtering");
+    return null;
   }
 
   const geometry = new THREE.BufferGeometry();
