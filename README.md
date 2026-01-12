@@ -49,6 +49,16 @@ Before running setup, make sure you have:
 - **Git** - [Download](https://git-scm.com/)
 - **Google AI Studio API Key** - [Get one here](https://aistudio.google.com/apikey)
 
+### What `setup.sh` installs
+
+The setup script will automatically:
+
+1. Create conda environment `3d-scene-gen` with Python 3.13
+2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp)
+3. Download SHARP model weights (~185MB)
+4. Install backend Python dependencies
+5. Install frontend Node.js dependencies
+
 ### Hardware Support for SHARP
 
 SHARP supports multiple backends:

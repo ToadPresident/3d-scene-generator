@@ -50,8 +50,8 @@ echo -e "${BLUE}📦 Step 2: Creating conda environment '${ENV_NAME}'...${NC}"
 # Remove existing environment if it exists
 conda env remove -n $ENV_NAME -y 2>/dev/null || true
 
-# Create fresh environment
-conda create -n $ENV_NAME python=3.11 -y
+# Create fresh environment with Python 3.13 (recommended by SHARP)
+conda create -n $ENV_NAME python=3.13 -y
 echo -e "${GREEN}✅ Conda environment created${NC}"
 
 # Get conda base path
@@ -79,18 +79,33 @@ cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ SHARP installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 4: Installing backend dependencies...${NC}"
+echo -e "${BLUE}📦 Step 4: Downloading SHARP model weights (~185MB)...${NC}"
+MODEL_DIR="$HOME/.cache/torch/hub/checkpoints"
+MODEL_FILE="$MODEL_DIR/sharp_2572gikvuh.pt"
+MODEL_URL="https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
+
+mkdir -p "$MODEL_DIR"
+if [ ! -f "$MODEL_FILE" ]; then
+    echo "Downloading model from Apple CDN..."
+    curl -L -o "$MODEL_FILE" "$MODEL_URL"
+    echo -e "${GREEN}✅ Model downloaded${NC}"
+else
+    echo -e "${GREEN}✅ Model already cached${NC}"
+fi
+
+echo ""
+echo -e "${BLUE}📦 Step 5: Installing backend dependencies...${NC}"
 "$ENV_PATH/bin/pip" install -r "$PROJECT_ROOT/backend/requirements.txt"
 echo -e "${GREEN}✅ Backend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 5: Installing frontend dependencies...${NC}"
+echo -e "${BLUE}📦 Step 6: Installing frontend dependencies...${NC}"
 cd "$PROJECT_ROOT/frontend"
 npm install
 echo -e "${GREEN}✅ Frontend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 6: Verifying SHARP installation...${NC}"
+echo -e "${BLUE}📦 Step 7: Verifying SHARP installation...${NC}"
 if "$ENV_PATH/bin/sharp" --help > /dev/null 2>&1; then
     echo -e "${GREEN}✅ SHARP CLI is working${NC}"
 else
