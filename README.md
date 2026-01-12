@@ -44,10 +44,19 @@ A web-based demo that combines **Google Gemini 2.5 Flash Image** for AI image ge
 
 ### Required
 
-- **Mac with Apple Silicon** (M1/M2/M3/M4) - Required for SHARP
 - **Python 3.13** (via Conda)
 - **Node.js 20+** (via nvm or homebrew)
 - **Google AI Studio API Key** - [Get one here](https://aistudio.google.com/apikey)
+
+### Hardware Support for SHARP
+
+SHARP supports multiple backends:
+
+- **CPU** - Works on any machine (slower)
+- **CUDA GPU** - NVIDIA GPUs with CUDA support (fastest)
+- **Apple MPS** - Apple Silicon Macs (M1/M2/M3/M4)
+
+> **Note**: Video rendering with `--render` requires a CUDA GPU. The basic `sharp predict` command works on all platforms.
 
 ### Install Apple SHARP
 

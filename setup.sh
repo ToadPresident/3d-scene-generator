@@ -13,17 +13,6 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-# Check if running on macOS
-if [[ "$OSTYPE" != "darwin"* ]]; then
-    echo -e "${RED}❌ This project requires macOS with Apple Silicon${NC}"
-    exit 1
-fi
-
-# Check for Apple Silicon
-if [[ $(uname -m) != "arm64" ]]; then
-    echo -e "${YELLOW}⚠️  Warning: This project is optimized for Apple Silicon (M1/M2/M3/M4)${NC}"
-fi
-
 echo ""
 echo "📦 Checking prerequisites..."
 
