@@ -10,13 +10,14 @@ interface PromptPanelProps {
   generationTime?: number;
 }
 
-// Example prompts for inspiration
+// Example prompts optimized for 3D Gaussian Splatting
+// Best scenes: deep perspective, corridors, tunnels, clear depth layers
 const EXAMPLE_PROMPTS = [
-  "INT. SPACE STATION - CORRIDOR - NIGHT, cinematic lighting",
-  "Cyberpunk detective office with neon signs and rain",
-  "Ancient temple ruins in a jungle, volumetric fog",
-  "Futuristic laboratory with holographic displays",
-  "Cozy cabin interior with fireplace in winter",
+  "Long underground subway tunnel with glowing lights receding into distance, perspective view",
+  "Cathedral interior with tall pillars and vaulted ceiling, deep perspective, photorealistic",
+  "Abandoned warehouse corridor with dramatic lighting, depth fog, cinematic",
+  "Japanese temple entrance with torii gates in a row, strong perspective",
+  "Spaceship hangar bay with distant stars visible through opening, volumetric lighting",
 ];
 
 export default function PromptPanel({

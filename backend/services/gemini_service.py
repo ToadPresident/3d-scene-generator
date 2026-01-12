@@ -23,13 +23,16 @@ async def generate_concept_image(prompt: str, output_path: str) -> str:
     Returns:
         Path to the saved image
     """
-    # Enhance prompt for 3D reconstruction quality
+    # Enhance prompt for optimal single-image 3D reconstruction
+    # Key: deep perspective, all-in-focus, strong depth cues, avoid shallow DOF
     enhanced_prompt = (
         f"{prompt}, "
-        "ultra wide angle lens, strong depth of field, "
-        "cinematic lighting, volumetric atmosphere, "
-        "8k photorealistic, single point perspective, "
-        "clear foreground midground background separation"
+        "first-person perspective view looking down a corridor or path, "
+        "everything in sharp focus from foreground to background, "
+        "strong linear perspective with vanishing point, "
+        "clear depth layers, deep scene with objects at multiple distances, "
+        "8k photorealistic, volumetric lighting, "
+        "architectural interior or outdoor landscape with depth"
     )
     
     # Generate image with 16:9 aspect ratio for immersive scenes

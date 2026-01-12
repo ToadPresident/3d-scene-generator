@@ -13,6 +13,8 @@ interface SceneViewerProps {
 }
 
 export default function SceneViewer({ plyUrl, isLoading, previewImageUrl }: SceneViewerProps) {
+  const [viewerError, setViewerError] = useState<string | null>(null);
+
   if (!plyUrl && !isLoading) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-b from-zinc-900 to-zinc-950">
@@ -46,10 +48,9 @@ export default function SceneViewer({ plyUrl, isLoading, previewImageUrl }: Scen
 
   return (
     <div className="w-full h-full relative bg-black">
-      {/* Controls hint */}
       <div className="absolute top-4 left-4 z-10 bg-black/70 backdrop-blur-sm px-4 py-2 rounded-lg">
         <p className="text-sm text-zinc-200">
-          🖱️ Drag to rotate &nbsp;|&nbsp; Scroll to zoom &nbsp;|&nbsp; Right-drag to pan
+          🖱️ Drag to rotate | Scroll to zoom | Right-drag to pan
         </p>
       </div>
       

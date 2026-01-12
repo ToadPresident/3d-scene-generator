@@ -33,9 +33,15 @@ A web-based demo that combines **Google Gemini 2.5 Flash Image** for AI image ge
                                                           │
                                                           ▼
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   3D Scene in   │◀────│   React Three    │◀────│   Apple SHARP   │
-│    Browser      │     │     Fiber        │     │   (.ply file)   │
-└─────────────────┘     └──────────────────┘     └─────────────────┘
+│   Apple SHARP   │────▶│  PLY → .splat    │────▶│  Optimized      │
+│   (3D Gaussians)│     │   Converter      │     │  .splat file    │
+└─────────────────┘     └──────────────────┘     └────────┬────────┘
+                                                          │
+                                                          ▼
+                        ┌──────────────────┐     ┌─────────────────┐
+                        │   3D Scene in    │◀────│  @react-three/  │
+                        │    Browser       │     │   drei <Splat>  │
+                        └──────────────────┘     └─────────────────┘
 ```
 
 ---
@@ -54,7 +60,7 @@ Before running setup, make sure you have:
 The setup script will automatically:
 
 1. Create conda environment `3d-scene-gen` with Python 3.13
-2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp) (with `pip install -e .`)
+2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp)
 3. Install backend Python dependencies
 4. Install frontend Node.js dependencies
 5. **Download SHARP model weights (~2GB)** and verify installation
@@ -190,9 +196,10 @@ Edit these constants in the source files:
 
 ### AI/3D
 
-- **Gemini 2.5 Flash Image** - Text-to-image generation
-- **Apple SHARP** - Single-image to 3D Gaussian Splatting
-- **Custom Binary PLY Parser** - Handles SHARP's binary PLY format
+- **Gemini 2.5 Flash Image** - Text-to-image generation with depth-optimized prompts
+- **Apple SHARP** - Single-image to 3D Gaussian Splatting reconstruction
+- **Antimatter15 PLY→Splat Converter** - Optimizes PLY to web-friendly .splat format
+- **@react-three/drei Splat** - GPU-accelerated Gaussian Splat rendering
 
 ---
 
