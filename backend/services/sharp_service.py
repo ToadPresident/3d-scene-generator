@@ -125,16 +125,26 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
     return str(ply_files[0])
 
 
-async def convert_ply_to_splat(ply_path: str, output_path: str) -> str:
+async def convert_ply_to_splat(ply_path: str, splat_path: str) -> str:
     """
-    Convert PLY to compressed .splat format for faster web loading.
+    Convert PLY to .splat format for optimized web rendering.
     
-    This is optional - the frontend can load PLY directly via gsplat.js,
-    but .splat files are more compact and load faster.
-    
-    Note: This requires additional tooling (e.g., gsplat CLI or Python converter).
-    For now, we skip this step and serve PLY directly.
+    The .splat format is:
+    - 10x smaller than PLY
+    - Pre-computed for fast GPU upload
+    - Compatible with gsplat.js
     """
-    # TODO: Implement if needed for production
-    # For now, return original PLY path
-    return ply_path
+    from services.ply_to_splat import convert_ply_to_splat as do_convert
+    
+    loop = asyncio.get_event_loop()
+    
+    def convert():
+        try:
+            result = do_convert(ply_path, splat_path)
+            print(f"Converted PLY to splat: {result}")
+            return splat_path
+        except Exception as e:
+            print(f"Conversion failed: {e}, returning original PLY")
+            return ply_path
+    
+    return await loop.run_in_executor(None, convert)

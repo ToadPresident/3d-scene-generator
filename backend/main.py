@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from services.gemini_service import generate_concept_image
-from services.sharp_service import generate_3d_scene
+from services.sharp_service import generate_3d_scene, convert_ply_to_splat
 
 
 # Configuration
@@ -88,7 +88,8 @@ async def generate_scene(request: GenerateRequest):
     1. Enhance prompt with depth/3D optimization keywords
     2. Generate 16:9 concept image via Gemini 2.5 Flash Image
     3. Convert to 3D Gaussian Splatting via Apple SHARP
-    4. Return URLs for frontend to render
+    4. Convert PLY to .splat format for optimized web rendering
+    5. Return URLs for frontend to render
     """
     import time
     start_time = time.time()
@@ -113,6 +114,10 @@ async def generate_scene(request: GenerateRequest):
         if not ply_path or not Path(ply_path).exists():
             raise HTTPException(status_code=500, detail="3D reconstruction failed")
         
+        # Step 3: Convert PLY to optimized .splat format
+        splat_path = str(output_dir / f"{session_id}.splat")
+        final_path = await convert_ply_to_splat(ply_path, splat_path)
+        
         # Copy image to static for preview
         static_image_path = output_dir / "concept.png"
         shutil.copy(image_path, static_image_path)
@@ -120,11 +125,11 @@ async def generate_scene(request: GenerateRequest):
         # Calculate time
         elapsed_ms = int((time.time() - start_time) * 1000)
         
-        # Return URLs
-        ply_filename = Path(ply_path).name
+        # Return URLs (use splat if conversion succeeded, otherwise PLY)
+        scene_filename = Path(final_path).name
         return GenerateResponse(
             success=True,
-            ply_url=f"/static/{session_id}/{ply_filename}",
+            ply_url=f"/static/{session_id}/{scene_filename}",
             image_url=f"/static/{session_id}/concept.png",
             generation_time_ms=elapsed_ms,
         )

@@ -1,146 +1,117 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface GaussianSplatViewerProps {
-  plyUrl: string;
+  plyUrl: string; // Can be .ply or .splat
 }
 
 export default function GaussianSplatViewer({ plyUrl }: GaussianSplatViewerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const viewerContainerRef = useRef<HTMLDivElement | null>(null);
   const [status, setStatus] = useState<string>("Loading...");
   const [error, setError] = useState<string | null>(null);
-  const viewerRef = useRef<any>(null);
-  const mountedRef = useRef(true);
-
-  // Create container outside React's control
-  const createContainer = useCallback(() => {
-    if (!wrapperRef.current) return null;
-    
-    // Remove old container if exists
-    if (viewerContainerRef.current && wrapperRef.current.contains(viewerContainerRef.current)) {
-      wrapperRef.current.removeChild(viewerContainerRef.current);
-    }
-    
-    // Create new container
-    const container = document.createElement("div");
-    container.style.width = "100%";
-    container.style.height = "100%";
-    container.style.position = "absolute";
-    container.style.top = "0";
-    container.style.left = "0";
-    wrapperRef.current.appendChild(container);
-    viewerContainerRef.current = container;
-    
-    return container;
-  }, []);
+  const initRef = useRef(false);
 
   useEffect(() => {
-    mountedRef.current = true;
+    // Prevent double init in React strict mode
+    if (initRef.current) return;
+    initRef.current = true;
+
+    let viewer: any = null;
+    let container: HTMLDivElement | null = null;
+    let animationId: number | null = null;
     
-    const initViewer = async () => {
+    const init = async () => {
+      if (!wrapperRef.current) return;
+      
       try {
-        const container = createContainer();
-        if (!container) return;
+        // Create container outside React control
+        container = document.createElement("div");
+        container.style.cssText = "width:100%;height:100%;position:absolute;top:0;left:0;";
+        wrapperRef.current.appendChild(container);
         
-        // Dynamic import
-        const GaussianSplats3D = await import("@mkkellogg/gaussian-splats-3d");
+        // Import gsplat.js
+        const SPLAT = await import("gsplat");
         
-        if (!mountedRef.current) return;
+        console.log("Loading scene:", plyUrl);
+        setStatus("Initializing viewer...");
         
-        // Clean up previous viewer
-        if (viewerRef.current) {
-          try {
-            viewerRef.current.dispose();
-          } catch (e) {
-            console.warn("Dispose error:", e);
-          }
-          viewerRef.current = null;
-        }
+        // Create scene
+        const scene = new SPLAT.Scene();
+        const camera = new SPLAT.Camera();
+        const renderer = new SPLAT.WebGLRenderer(container);
+        const controls = new SPLAT.OrbitControls(camera, renderer.canvas);
         
-        console.log("Initializing viewer for:", plyUrl);
+        // Set initial camera position
+        camera.position.set(0, 0, 3);
         
-        const viewer = new GaussianSplats3D.Viewer({
-          rootElement: container,
-          cameraUp: [0, 1, 0],
-          initialCameraPosition: [0, 0, 3],
-          initialCameraLookAt: [0, 0, 0],
-          selfDrivenMode: true,
-          useBuiltInControls: true,
-          dynamicScene: false,
-          sharedMemoryForWorkers: false,
+        viewer = { scene, camera, renderer, controls };
+        
+        setStatus("Loading 3D scene...");
+        
+        // Load the scene (.splat or .ply)
+        await SPLAT.Loader.LoadAsync(plyUrl, scene, (progress: number) => {
+          setStatus(`Loading... ${Math.round(progress * 100)}%`);
         });
         
-        viewerRef.current = viewer;
-        setStatus("Loading PLY...");
-        
-        await viewer.addSplatScene(plyUrl, {
-          splatAlphaRemovalThreshold: 5,
-          showLoadingUI: false,
-          progressiveLoad: true,
-          rotation: [1, 0, 0, 0],
-        });
-        
-        if (!mountedRef.current) {
-          viewer.dispose();
-          return;
-        }
-        
-        viewer.start();
+        console.log("Scene loaded successfully");
         setStatus("");
-        console.log("Viewer started");
         
-      } catch (e) {
+        // Render loop
+        const frame = () => {
+          controls.update();
+          renderer.render(scene, camera);
+          animationId = requestAnimationFrame(frame);
+        };
+        animationId = requestAnimationFrame(frame);
+        
+      } catch (e: any) {
         console.error("Viewer error:", e);
-        if (mountedRef.current) {
-          setError(e instanceof Error ? e.message : "Failed to load");
+        // Don't show error for abort/dispose
+        if (!e?.message?.includes("disposed") && !e?.message?.includes("abort")) {
+          setError(e?.message || "Failed to load scene");
         }
       }
     };
     
-    initViewer();
+    init();
     
     return () => {
-      mountedRef.current = false;
+      initRef.current = false;
       
-      if (viewerRef.current) {
-        try {
-          viewerRef.current.dispose();
-        } catch (e) {
-          // Ignore dispose errors
-        }
-        viewerRef.current = null;
+      if (animationId) {
+        cancelAnimationFrame(animationId);
       }
       
-      // Clean up container manually
-      if (viewerContainerRef.current && wrapperRef.current?.contains(viewerContainerRef.current)) {
-        try {
-          wrapperRef.current.removeChild(viewerContainerRef.current);
-        } catch (e) {
-          // Ignore
-        }
+      if (viewer?.renderer) {
+        try { viewer.renderer.dispose(); } catch (e) {}
       }
-      viewerContainerRef.current = null;
+      
+      if (container && wrapperRef.current?.contains(container)) {
+        try { wrapperRef.current.removeChild(container); } catch (e) {}
+      }
     };
-  }, [plyUrl, createContainer]);
+  }, [plyUrl]);
 
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-red-900/20">
         <div className="text-center p-4">
           <p className="text-red-400 mb-2">Error: {error}</p>
-          <p className="text-zinc-500 text-sm">Check console for details</p>
+          <p className="text-zinc-500 text-xs">Check console for details</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div ref={wrapperRef} className="w-full h-full relative" style={{ minHeight: "400px" }}>
+    <div ref={wrapperRef} className="w-full h-full relative bg-zinc-950" style={{ minHeight: "400px" }}>
       {status && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10 pointer-events-none">
-          <p className="text-white text-lg">{status}</p>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-10 pointer-events-none">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+            <p className="text-white">{status}</p>
+          </div>
         </div>
       )}
     </div>
