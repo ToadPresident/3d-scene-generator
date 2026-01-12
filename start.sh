@@ -47,11 +47,21 @@ echo "Cleaning up old processes..."
 lsof -ti:8000 | xargs kill -9 2>/dev/null || true
 lsof -ti:3000 | xargs kill -9 2>/dev/null || true
 
+# Add conda environment to PATH so subprocess can find sharp
+export PATH="$ENV_PATH/bin:$PATH"
+
+# Verify sharp is available
+if ! command -v sharp &> /dev/null; then
+    echo -e "${RED}❌ SHARP not found. Run setup.sh first.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✅ SHARP CLI found${NC}"
+
 # Start backend
 echo ""
 echo -e "${BLUE}Starting backend on http://localhost:8000...${NC}"
 cd "$PROJECT_ROOT/backend"
-"$ENV_PATH/bin/uvicorn" main:app --host 0.0.0.0 --port 8000 &
+uvicorn main:app --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
 sleep 2
 
