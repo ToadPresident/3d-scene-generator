@@ -78,11 +78,14 @@ cd "$SHARP_DIR"
 # Step 1: Install dependencies
 "$ENV_PATH/bin/pip" install -r requirements.txt
 
-# Step 2: Install SHARP package itself (this makes 'sharp' CLI available)
-"$ENV_PATH/bin/pip" install -e .
+# Step 2: Install SHARP package (non-editable, copies to site-packages)
+"$ENV_PATH/bin/pip" install .
 
 cd "$PROJECT_ROOT"
-echo -e "${GREEN}✅ SHARP installed${NC}"
+
+# Clean up source directory (it's now installed to site-packages)
+rm -rf "$SHARP_DIR"
+echo -e "${GREEN}✅ SHARP installed (source cleaned up)${NC}"
 
 echo ""
 echo -e "${BLUE}📦 Step 4: Installing backend dependencies...${NC}"
