@@ -10,87 +10,80 @@ export default function GaussianSplatViewer({ plyUrl }: GaussianSplatViewerProps
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<string>("Loading...");
   const [error, setError] = useState<string | null>(null);
-  const rendererRef = useRef<any>(null);
+  const viewerRef = useRef<any>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
     
     let mounted = true;
     
-    const initGsplat = async () => {
+    const initViewer = async () => {
       try {
-        // Dynamic import to avoid SSR issues
-        const SPLAT = await import("gsplat");
+        // Dynamic import
+        const GaussianSplats3D = await import("@mkkellogg/gaussian-splats-3d");
         
         if (!mounted || !containerRef.current) return;
         
-        // Clear previous
+        // Clean up previous viewer
+        if (viewerRef.current) {
+          viewerRef.current.dispose();
+          viewerRef.current = null;
+        }
         containerRef.current.innerHTML = "";
         
-        // Create scene
-        const scene = new SPLAT.Scene();
-        const camera = new SPLAT.Camera();
-        const renderer = new SPLAT.WebGLRenderer();
-        const controls = new SPLAT.OrbitControls(camera, renderer.canvas);
+        console.log("Initializing GaussianSplats3D viewer for:", plyUrl);
         
-        // Style canvas
-        renderer.canvas.style.width = "100%";
-        renderer.canvas.style.height = "100%";
-        containerRef.current.appendChild(renderer.canvas);
+        // Create viewer with orbit controls for exploration
+        const viewer = new GaussianSplats3D.Viewer({
+          rootElement: containerRef.current,
+          cameraUp: [0, 1, 0],
+          initialCameraPosition: [0, 0, 3],
+          initialCameraLookAt: [0, 0, 0],
+          selfDrivenMode: true,
+          useBuiltInControls: true,
+          dynamicScene: false,
+          sharedMemoryForWorkers: false, // Avoid CORS issues
+        });
         
-        rendererRef.current = renderer;
+        viewerRef.current = viewer;
         
-        // Handle resize
-        const handleResize = () => {
-          if (!containerRef.current) return;
-          const rect = containerRef.current.getBoundingClientRect();
-          renderer.setSize(rect.width, rect.height);
-        };
-        handleResize();
-        window.addEventListener("resize", handleResize);
+        setStatus("Loading PLY...");
         
-        // Load PLY
-        setStatus("Loading Gaussian Splat...");
-        console.log("Loading:", plyUrl);
-        
-        await SPLAT.Loader.LoadAsync(plyUrl, scene, (progress: number) => {
-          setStatus(`Loading... ${Math.round(progress * 100)}%`);
+        // Load the PLY scene
+        await viewer.addSplatScene(plyUrl, {
+          splatAlphaRemovalThreshold: 5,
+          showLoadingUI: false,
+          progressiveLoad: true,
+          rotation: [1, 0, 0, 0], // Rotate to fix SHARP's coordinate system
         });
         
         if (!mounted) return;
         
+        // Start rendering
+        viewer.start();
+        
         setStatus("");
-        console.log("Loaded successfully");
-        
-        // Render loop
-        const frame = () => {
-          if (!mounted) return;
-          controls.update();
-          renderer.render(scene, camera);
-          requestAnimationFrame(frame);
-        };
-        requestAnimationFrame(frame);
-        
-        // Cleanup
-        return () => {
-          window.removeEventListener("resize", handleResize);
-          renderer.dispose();
-        };
+        console.log("GaussianSplats3D viewer started successfully");
         
       } catch (e) {
-        console.error("Gsplat error:", e);
+        console.error("Viewer error:", e);
         if (mounted) {
-          setError(e instanceof Error ? e.message : "Failed to load");
+          setError(e instanceof Error ? e.message : "Failed to load scene");
         }
       }
     };
     
-    initGsplat();
+    initViewer();
     
     return () => {
       mounted = false;
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
+      if (viewerRef.current) {
+        try {
+          viewerRef.current.dispose();
+        } catch (e) {
+          console.warn("Dispose error:", e);
+        }
+        viewerRef.current = null;
       }
     };
   }, [plyUrl]);
@@ -98,7 +91,10 @@ export default function GaussianSplatViewer({ plyUrl }: GaussianSplatViewerProps
   if (error) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-red-900/20">
-        <p className="text-red-400">Error: {error}</p>
+        <div className="text-center p-4">
+          <p className="text-red-400 mb-2">Error: {error}</p>
+          <p className="text-zinc-500 text-sm">Check browser console for details</p>
+        </div>
       </div>
     );
   }
@@ -106,7 +102,7 @@ export default function GaussianSplatViewer({ plyUrl }: GaussianSplatViewerProps
   return (
     <div ref={containerRef} className="w-full h-full relative">
       {status && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
           <p className="text-white text-lg">{status}</p>
         </div>
       )}
