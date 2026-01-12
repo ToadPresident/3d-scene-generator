@@ -78,14 +78,16 @@ sharp --help
 
 ## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Option 1: Local Development (Recommended)
+
+#### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/3d-scene-generator.git
 cd 3d-scene-generator
 ```
 
-### 2. Setup Backend
+#### 2. Setup Backend
 
 ```bash
 # Activate your SHARP conda environment
@@ -104,7 +106,7 @@ export GOOGLE_API_KEY="your-api-key-here"
 uvicorn main:app --reload --port 8000
 ```
 
-### 3. Setup Frontend (new terminal)
+#### 3. Setup Frontend (new terminal)
 
 ```bash
 cd frontend
@@ -116,9 +118,37 @@ npm install
 npm run dev
 ```
 
-### 4. Open the App
+#### 4. Open the App
 
 Navigate to **http://localhost:3000** in your browser.
+
+---
+
+### Option 2: One-Click Script
+
+```bash
+# Run setup first (one-time)
+chmod +x setup.sh && ./setup.sh
+
+# Then start both services
+export GOOGLE_API_KEY="your-api-key"
+./start.sh
+```
+
+---
+
+### Option 3: Docker (Frontend Only)
+
+> ⚠️ **Note**: Docker can run the frontend, but SHARP requires local installation due to GPU/MPS access.
+
+```bash
+# Start frontend with Docker
+docker-compose up frontend
+
+# Run backend locally (in another terminal)
+conda activate sharp
+cd backend && uvicorn main:app --port 8000
+```
 
 ---
 

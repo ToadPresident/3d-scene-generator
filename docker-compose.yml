@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    volumes:
+      - ./backend:/app
+      - backend_static:/app/static
+      - backend_temp:/app/temp
+    # Note: SHARP needs to be installed on host machine
+    # This container handles Gemini API only
+    # For full functionality, run backend on host with SHARP installed
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_static:
+  backend_temp:
