@@ -185,14 +185,14 @@ Edit these constants in the source files:
 - **Next.js 15** - React framework with App Router
 - **React 19** - Latest React with improved performance
 - **React Three Fiber** - React renderer for Three.js
-- **@react-three/drei** - R3F utilities (Splat, PointerLockControls)
-- **@mkkellogg/gaussian-splats-3d** - Gaussian splat rendering engine
+- **@react-three/drei** - R3F utilities (PointerLockControls)
 - **Tailwind CSS** - Utility-first styling
 
 ### AI/3D
 
 - **Gemini 2.5 Flash Image** - Text-to-image generation
-- **Apple SHARP** - Single-image to 3D Gaussian Splatting (.ply)
+- **Apple SHARP** - Single-image to 3D Gaussian Splatting
+- **Custom Binary PLY Parser** - Handles SHARP's binary PLY format
 
 ---
 
