@@ -5,8 +5,35 @@ Converts single images to 3D Gaussian Splatting via SHARP CLI.
 
 import asyncio
 import subprocess
+import shutil
+import os
 from pathlib import Path
 from typing import Optional
+
+# SHARP CLI path - update this if SHARP is installed elsewhere
+# Default: try to find in common locations
+SHARP_PATHS = [
+    "/opt/anaconda3/envs/sharp/bin/sharp",  # macOS conda
+    os.path.expanduser("~/anaconda3/envs/sharp/bin/sharp"),
+    os.path.expanduser("~/miniconda3/envs/sharp/bin/sharp"),
+    "sharp",  # Fallback to PATH
+]
+
+def get_sharp_path() -> str:
+    """Find the SHARP CLI executable."""
+    for path in SHARP_PATHS:
+        if path == "sharp":
+            # Check if in PATH
+            result = subprocess.run(["which", "sharp"], capture_output=True, text=True)
+            if result.returncode == 0:
+                return result.stdout.strip()
+        elif os.path.exists(path):
+            return path
+    raise RuntimeError(
+        "SHARP CLI not found. Please install SHARP:\n"
+        "  git clone https://github.com/apple/ml-sharp.git\n"
+        "  cd ml-sharp && pip install -r requirements.txt"
+    )
 
 
 async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
@@ -23,19 +50,46 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
     Returns:
         Path to generated .ply file, or None if failed
     """
+    import os
+    
+    # Ensure absolute paths
+    image_path = os.path.abspath(image_path)
+    output_dir = os.path.abspath(output_dir)
+    
+    # Verify input image exists
+    if not os.path.exists(image_path):
+        raise RuntimeError(f"Input image not found: {image_path}")
+    
     # Ensure output directory exists
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     
-    # Run SHARP CLI in subprocess (CPU-bound, so we run in executor)
-    # SHARP command: sharp predict -i <input> -o <output_dir>
-    cmd = ["sharp", "predict", "-i", image_path, "-o", output_dir]
+    # SHARP expects a directory of images, not a single file
+    # Create a temp directory with the single image
+    input_dir = Path(output_dir) / "input"
+    input_dir.mkdir(exist_ok=True)
+    
+    # Copy or link the image to the input directory
+    import shutil
+    input_image_path = input_dir / Path(image_path).name
+    if not input_image_path.exists():
+        shutil.copy(image_path, input_image_path)
+    
+    # Run SHARP CLI
+    # SHARP command: sharp predict -i <input_dir> -o <output_dir>
+    sharp_path = get_sharp_path()
+    cmd = [sharp_path, "predict", "-i", str(input_dir), "-o", output_dir]
+    
+    print(f"Running SHARP: {' '.join(cmd)}")
     
     # Run in thread pool to avoid blocking async event loop
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(
         None,
-        lambda: subprocess.run(cmd, capture_output=True, text=True)
+        lambda: subprocess.run(cmd, capture_output=True, text=True, timeout=120)
     )
+    
+    print(f"SHARP stdout: {result.stdout}")
+    print(f"SHARP stderr: {result.stderr}")
     
     if result.returncode != 0:
         error_msg = result.stderr or result.stdout or "Unknown error"
@@ -46,7 +100,11 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
     ply_files = list(output_path.glob("*.ply"))
     
     if not ply_files:
-        raise RuntimeError("SHARP did not generate any .ply files")
+        # Check subdirectories too
+        ply_files = list(output_path.rglob("*.ply"))
+    
+    if not ply_files:
+        raise RuntimeError(f"SHARP did not generate any .ply files in {output_dir}")
     
     # Return the first (usually only) PLY file
     return str(ply_files[0])
