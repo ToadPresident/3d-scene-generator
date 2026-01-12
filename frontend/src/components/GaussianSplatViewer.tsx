@@ -273,139 +273,156 @@ function GaussianSplatMesh({ plyUrl }: { plyUrl: string }) {
   return <group ref={groupRef} />;
 }
 
-// Parse PLY file containing Gaussian Splat data
+// Parse PLY file containing Gaussian Splat data (supports binary format)
 function parseGaussianSplatPly(buffer: ArrayBuffer): { geometry: THREE.BufferGeometry } | null {
-  const text = new TextDecoder().decode(buffer);
-  const lines = text.split("\n");
+  const uint8 = new Uint8Array(buffer);
   
-  let vertexCount = 0;
+  // Find header end
   let headerEnd = 0;
-  const properties: string[] = [];
-
-  // Parse header
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-    
-    if (line.startsWith("element vertex")) {
-      vertexCount = parseInt(line.split(" ")[2]);
-    }
-    if (line.startsWith("property")) {
-      properties.push(line);
-    }
-    if (line === "end_header") {
-      headerEnd = i + 1;
-      break;
+  const headerText: string[] = [];
+  let lineStart = 0;
+  
+  for (let i = 0; i < Math.min(uint8.length, 10000); i++) {
+    if (uint8[i] === 10) { // newline
+      const line = new TextDecoder().decode(uint8.slice(lineStart, i)).trim();
+      headerText.push(line);
+      lineStart = i + 1;
+      
+      if (line === "end_header") {
+        headerEnd = i + 1;
+        break;
+      }
     }
   }
-
-  if (vertexCount === 0) {
-    console.error("PLY parse error: No vertices found");
+  
+  if (headerEnd === 0) {
+    console.error("PLY parse error: Could not find end_header");
     return null;
   }
-
-  console.log(`Parsing PLY: ${vertexCount} vertices, ${properties.length} properties`);
-
-  // Detect property indices
-  const hasRgb = properties.some(p => p.includes(" red") || p.includes(" diffuse_red") || p.includes(" f_dc_0"));
-  const hasOpacity = properties.some(p => p.includes(" opacity") || p.includes(" alpha"));
-  const hasScale = properties.some(p => p.includes(" scale_0") || p.includes(" scale"));
-
+  
+  // Parse header
+  let vertexCount = 0;
+  let isBinary = false;
+  let isLittleEndian = true;
+  const properties: { name: string; type: string }[] = [];
+  
+  for (const line of headerText) {
+    if (line.startsWith("format binary_little_endian")) {
+      isBinary = true;
+      isLittleEndian = true;
+    } else if (line.startsWith("format binary_big_endian")) {
+      isBinary = true;
+      isLittleEndian = false;
+    } else if (line.startsWith("element vertex")) {
+      vertexCount = parseInt(line.split(" ")[2]);
+    } else if (line.startsWith("property float") || line.startsWith("property double")) {
+      const parts = line.split(" ");
+      properties.push({ name: parts[2], type: parts[1] });
+    }
+  }
+  
+  console.log(`PLY: ${vertexCount} vertices, ${properties.length} properties, binary: ${isBinary}`);
+  
+  if (vertexCount === 0 || properties.length === 0) {
+    console.error("PLY parse error: No vertices or properties");
+    return null;
+  }
+  
+  // Find property indices
+  const propIndex: Record<string, number> = {};
+  properties.forEach((p, i) => propIndex[p.name] = i);
+  
+  const hasX = 'x' in propIndex;
+  const hasY = 'y' in propIndex;
+  const hasZ = 'z' in propIndex;
+  
+  if (!hasX || !hasY || !hasZ) {
+    console.error("PLY parse error: Missing position properties");
+    return null;
+  }
+  
+  // Calculate bytes per vertex (assuming all float32)
+  const bytesPerVertex = properties.length * 4;
+  
   const positions: number[] = [];
   const colors: number[] = [];
   const sizes: number[] = [];
   const opacities: number[] = [];
-
-  let validVertices = 0;
-  let skippedVertices = 0;
-
-  // Parse vertex data
-  for (let i = headerEnd; i < headerEnd + vertexCount && i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
+  
+  const dataView = new DataView(buffer, headerEnd);
+  let validCount = 0;
+  
+  for (let i = 0; i < vertexCount; i++) {
+    const offset = i * bytesPerVertex;
     
-    const parts = line.split(/\s+/).map(parseFloat);
+    if (offset + bytesPerVertex > dataView.byteLength) break;
     
-    // Skip if not enough data or position is invalid
-    if (parts.length < 3) {
-      skippedVertices++;
-      continue;
-    }
+    // Read position
+    const x = dataView.getFloat32(offset + propIndex['x'] * 4, isLittleEndian);
+    const y = dataView.getFloat32(offset + propIndex['y'] * 4, isLittleEndian);
+    const z = dataView.getFloat32(offset + propIndex['z'] * 4, isLittleEndian);
     
-    // Check for NaN or Infinity in position
-    const x = parts[0];
-    const y = parts[1];
-    const z = parts[2];
+    // Skip invalid positions
+    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) continue;
     
-    if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(z)) {
-      skippedVertices++;
-      continue;
-    }
-
-    // Position
     positions.push(x, y, z);
-    validVertices++;
-
-    // Colors - SHARP uses f_dc_0, f_dc_1, f_dc_2 for spherical harmonics
-    if (parts.length >= 6) {
-      let r = parts[3];
-      let g = parts[4];
-      let b = parts[5];
+    validCount++;
+    
+    // Colors from spherical harmonics (f_dc_0, f_dc_1, f_dc_2)
+    if ('f_dc_0' in propIndex && 'f_dc_1' in propIndex && 'f_dc_2' in propIndex) {
+      const f0 = dataView.getFloat32(offset + propIndex['f_dc_0'] * 4, isLittleEndian);
+      const f1 = dataView.getFloat32(offset + propIndex['f_dc_1'] * 4, isLittleEndian);
+      const f2 = dataView.getFloat32(offset + propIndex['f_dc_2'] * 4, isLittleEndian);
       
-      // Handle spherical harmonics (f_dc values are typically small, need sigmoid transform)
-      if (Math.abs(r) < 1 && Math.abs(g) < 1 && Math.abs(b) < 1) {
-        // SH to RGB conversion (simplified)
-        r = 0.5 + r * 0.5;
-        g = 0.5 + g * 0.5;
-        b = 0.5 + b * 0.5;
-      } else if (r > 1 || g > 1 || b > 1) {
-        // Normalize from 0-255 range
-        r = r / 255;
-        g = g / 255;
-        b = b / 255;
-      }
-      
-      colors.push(
-        Math.max(0, Math.min(1, r)),
-        Math.max(0, Math.min(1, g)),
-        Math.max(0, Math.min(1, b))
-      );
+      // Convert SH to RGB (C0 = 0.28209479177387814)
+      const C0 = 0.28209479177387814;
+      const r = Math.max(0, Math.min(1, 0.5 + C0 * f0));
+      const g = Math.max(0, Math.min(1, 0.5 + C0 * f1));
+      const b = Math.max(0, Math.min(1, 0.5 + C0 * f2));
+      colors.push(r, g, b);
+    } else if ('red' in propIndex && 'green' in propIndex && 'blue' in propIndex) {
+      const r = dataView.getFloat32(offset + propIndex['red'] * 4, isLittleEndian);
+      const g = dataView.getFloat32(offset + propIndex['green'] * 4, isLittleEndian);
+      const b = dataView.getFloat32(offset + propIndex['blue'] * 4, isLittleEndian);
+      colors.push(r > 1 ? r / 255 : r, g > 1 ? g / 255 : g, b > 1 ? b / 255 : b);
     } else {
-      colors.push(0.7, 0.7, 0.7); // Default gray
+      colors.push(0.7, 0.7, 0.7);
     }
-
-    // Size from scale property or default
-    if (hasScale && parts.length >= 10) {
-      const scales = [parts[6], parts[7], parts[8]].map(s => Math.abs(s || 0));
-      const avgScale = scales.reduce((a, b) => a + b, 0) / 3;
-      sizes.push(Math.max(0.005, Math.min(0.2, avgScale * 0.1)));
+    
+    // Scale
+    if ('scale_0' in propIndex && 'scale_1' in propIndex && 'scale_2' in propIndex) {
+      const s0 = dataView.getFloat32(offset + propIndex['scale_0'] * 4, isLittleEndian);
+      const s1 = dataView.getFloat32(offset + propIndex['scale_1'] * 4, isLittleEndian);
+      const s2 = dataView.getFloat32(offset + propIndex['scale_2'] * 4, isLittleEndian);
+      const avgScale = (Math.exp(s0) + Math.exp(s1) + Math.exp(s2)) / 3;
+      sizes.push(Math.max(0.001, Math.min(0.1, avgScale * 0.02)));
     } else {
-      sizes.push(0.015);
+      sizes.push(0.01);
     }
-
+    
     // Opacity
-    if (hasOpacity && parts.length > 9) {
-      // Opacity is usually after scale values
-      const opacityRaw = parts[9];
-      // Convert logit to opacity: sigmoid(x) = 1 / (1 + exp(-x))
-      const op = 1 / (1 + Math.exp(-opacityRaw));
+    if ('opacity' in propIndex) {
+      const opRaw = dataView.getFloat32(offset + propIndex['opacity'] * 4, isLittleEndian);
+      // Sigmoid transform
+      const op = 1 / (1 + Math.exp(-opRaw));
       opacities.push(Math.max(0.1, Math.min(1.0, op)));
     } else {
-      opacities.push(0.7);
+      opacities.push(0.8);
     }
   }
-
-  console.log(`PLY parsed: ${validVertices} valid vertices, ${skippedVertices} skipped`);
-
-  if (validVertices === 0) {
-    console.error("PLY parse error: No valid vertices after filtering");
+  
+  console.log(`PLY parsed: ${validCount} valid vertices`);
+  
+  if (validCount === 0) {
+    console.error("PLY parse error: No valid vertices");
     return null;
   }
-
+  
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   geometry.setAttribute("size", new THREE.Float32BufferAttribute(sizes, 1));
   geometry.setAttribute("opacity", new THREE.Float32BufferAttribute(opacities, 1));
-
+  
   return { geometry };
 }
