@@ -79,18 +79,45 @@ cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ SHARP installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 4: Downloading SHARP model weights (~185MB)...${NC}"
+echo -e "${BLUE}📦 Step 4: Downloading SHARP model weights (~2.6GB)...${NC}"
+echo -e "${YELLOW}   This may take several minutes depending on your connection.${NC}"
 MODEL_DIR="$HOME/.cache/torch/hub/checkpoints"
 MODEL_FILE="$MODEL_DIR/sharp_2572gikvuh.pt"
 MODEL_URL="https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
+EXPECTED_SIZE=2700000000  # approximately 2.6GB in bytes
 
 mkdir -p "$MODEL_DIR"
-if [ ! -f "$MODEL_FILE" ]; then
+
+download_model() {
     echo "Downloading model from Apple CDN..."
-    curl -L -o "$MODEL_FILE" "$MODEL_URL"
-    echo -e "${GREEN}✅ Model downloaded${NC}"
+    curl -L --progress-bar -o "$MODEL_FILE" "$MODEL_URL"
+}
+
+verify_model() {
+    if [ -f "$MODEL_FILE" ]; then
+        ACTUAL_SIZE=$(stat -f%z "$MODEL_FILE" 2>/dev/null || stat -c%s "$MODEL_FILE" 2>/dev/null)
+        if [ "$ACTUAL_SIZE" -gt "$EXPECTED_SIZE" ]; then
+            return 0  # File is valid
+        fi
+    fi
+    return 1  # File missing or too small
+}
+
+if verify_model; then
+    echo -e "${GREEN}✅ Model already cached and verified${NC}"
 else
-    echo -e "${GREEN}✅ Model already cached${NC}"
+    # Remove potentially corrupted file
+    rm -f "$MODEL_FILE"
+    download_model
+    
+    if verify_model; then
+        echo -e "${GREEN}✅ Model downloaded and verified${NC}"
+    else
+        echo -e "${RED}❌ Model download failed or file is corrupted${NC}"
+        echo "   Please try downloading manually:"
+        echo "   curl -L -o $MODEL_FILE $MODEL_URL"
+        exit 1
+    fi
 fi
 
 echo ""
