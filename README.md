@@ -54,10 +54,11 @@ Before running setup, make sure you have:
 The setup script will automatically:
 
 1. Create conda environment `3d-scene-gen` with Python 3.13
-2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp)
-3. Download SHARP model weights (**~2.6GB** - may take several minutes)
-4. Install backend Python dependencies
-5. Install frontend Node.js dependencies
+2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp) (with `pip install -e .`)
+3. Install backend Python dependencies
+4. Install frontend Node.js dependencies
+
+> **Note**: SHARP model weights (~2GB) will download automatically on first run.
 
 ### Hardware Support for SHARP
 

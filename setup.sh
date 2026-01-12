@@ -71,68 +71,32 @@ else
     cd "$SHARP_DIR" && git pull
 fi
 
-# Install SHARP dependencies (must run from within ml-sharp directory)
-echo "Installing SHARP dependencies..."
+# Install SHARP dependencies and the package itself
+echo "Installing SHARP..."
 cd "$SHARP_DIR"
+
+# Step 1: Install dependencies
 "$ENV_PATH/bin/pip" install -r requirements.txt
+
+# Step 2: Install SHARP package itself (this makes 'sharp' CLI available)
+"$ENV_PATH/bin/pip" install -e .
+
 cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ SHARP installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 4: Downloading SHARP model weights (~2.6GB)...${NC}"
-echo -e "${YELLOW}   This may take several minutes depending on your connection.${NC}"
-MODEL_DIR="$HOME/.cache/torch/hub/checkpoints"
-MODEL_FILE="$MODEL_DIR/sharp_2572gikvuh.pt"
-MODEL_URL="https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
-EXPECTED_SIZE=2700000000  # approximately 2.6GB in bytes
-
-mkdir -p "$MODEL_DIR"
-
-download_model() {
-    echo "Downloading model from Apple CDN..."
-    curl -L --progress-bar -o "$MODEL_FILE" "$MODEL_URL"
-}
-
-verify_model() {
-    if [ -f "$MODEL_FILE" ]; then
-        ACTUAL_SIZE=$(stat -f%z "$MODEL_FILE" 2>/dev/null || stat -c%s "$MODEL_FILE" 2>/dev/null)
-        if [ "$ACTUAL_SIZE" -gt "$EXPECTED_SIZE" ]; then
-            return 0  # File is valid
-        fi
-    fi
-    return 1  # File missing or too small
-}
-
-if verify_model; then
-    echo -e "${GREEN}✅ Model already cached and verified${NC}"
-else
-    # Remove potentially corrupted file
-    rm -f "$MODEL_FILE"
-    download_model
-    
-    if verify_model; then
-        echo -e "${GREEN}✅ Model downloaded and verified${NC}"
-    else
-        echo -e "${RED}❌ Model download failed or file is corrupted${NC}"
-        echo "   Please try downloading manually:"
-        echo "   curl -L -o $MODEL_FILE $MODEL_URL"
-        exit 1
-    fi
-fi
-
-echo ""
-echo -e "${BLUE}📦 Step 5: Installing backend dependencies...${NC}"
+echo -e "${BLUE}📦 Step 4: Installing backend dependencies...${NC}"
 "$ENV_PATH/bin/pip" install -r "$PROJECT_ROOT/backend/requirements.txt"
 echo -e "${GREEN}✅ Backend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 6: Installing frontend dependencies...${NC}"
+echo -e "${BLUE}📦 Step 5: Installing frontend dependencies...${NC}"
 cd "$PROJECT_ROOT/frontend"
 npm install
 echo -e "${GREEN}✅ Frontend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 7: Verifying SHARP installation...${NC}"
+echo -e "${BLUE}📦 Step 6: Verifying SHARP installation...${NC}"
 if "$ENV_PATH/bin/sharp" --help > /dev/null 2>&1; then
     echo -e "${GREEN}✅ SHARP CLI is working${NC}"
 else
@@ -144,6 +108,8 @@ echo ""
 echo "=============================================="
 echo -e "${GREEN}🎉 Setup complete!${NC}"
 echo ""
+echo -e "${YELLOW}⚠️  NOTE: First run will download model weights (~2GB)${NC}"
+echo ""
 echo "To start the application:"
 echo ""
 echo -e "${YELLOW}1. Activate the environment:${NC}"
@@ -152,14 +118,13 @@ echo ""
 echo -e "${YELLOW}2. Set your Google API key:${NC}"
 echo "   export GOOGLE_API_KEY=\"your-api-key-here\""
 echo ""
-echo -e "${YELLOW}3. Start backend (Terminal 1):${NC}"
-echo "   cd $PROJECT_ROOT/backend"
-echo "   uvicorn main:app --reload --port 8000"
+echo -e "${YELLOW}3. Start the app (one command):${NC}"
+echo "   ./start.sh"
 echo ""
-echo -e "${YELLOW}4. Start frontend (Terminal 2):${NC}"
-echo "   cd $PROJECT_ROOT/frontend"
-echo "   npm run dev"
+echo -e "${YELLOW}   Or manually:${NC}"
+echo "   Terminal 1: cd backend && uvicorn main:app --reload --port 8000"
+echo "   Terminal 2: cd frontend && npm run dev"
 echo ""
-echo -e "${YELLOW}5. Open in browser:${NC}"
+echo -e "${YELLOW}4. Open in browser:${NC}"
 echo "   http://localhost:3000"
 echo ""
