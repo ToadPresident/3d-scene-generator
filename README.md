@@ -42,10 +42,11 @@ A web-based demo that combines **Google Gemini 2.5 Flash Image** for AI image ge
 
 ## 📋 Prerequisites
 
-### Required
+Before running setup, make sure you have:
 
-- **Python 3.13** (via Conda)
-- **Node.js 20+** (via nvm or homebrew)
+- **Conda** (Miniconda or Anaconda) - [Download](https://docs.conda.io/en/latest/miniconda.html)
+- **Node.js 20+** - [Download](https://nodejs.org/)
+- **Git** - [Download](https://git-scm.com/)
 - **Google AI Studio API Key** - [Get one here](https://aistudio.google.com/apikey)
 
 ### Hardware Support for SHARP
@@ -53,25 +54,35 @@ A web-based demo that combines **Google Gemini 2.5 Flash Image** for AI image ge
 SHARP supports multiple backends:
 
 - **CPU** - Works on any machine (slower)
-- **CUDA GPU** - NVIDIA GPUs with CUDA support (fastest)
+- **CUDA GPU** - NVIDIA GPUs (fastest)
 - **Apple MPS** - Apple Silicon Macs (M1/M2/M3/M4)
 
-> **Note**: Video rendering with `--render` requires a CUDA GPU. The basic `sharp predict` command works on all platforms.
+---
 
-### Install Apple SHARP
+## 🚀 Quick Start (One Command Setup)
 
 ```bash
-# Create conda environment
-conda create -n sharp python=3.13
-conda activate sharp
+# 1. Clone the repository
+git clone https://github.com/YOUR_USERNAME/3d-scene-generator.git
+cd 3d-scene-generator
 
-# Clone and install SHARP
-git clone https://github.com/apple/ml-sharp.git
-cd ml-sharp
-pip install -r requirements.txt
+# 2. Run setup script (installs everything including SHARP)
+chmod +x setup.sh
+./setup.sh
 
-# Verify installation
-sharp --help
+# 3. Activate environment
+conda activate 3d-scene-gen
+
+# 4. Set your API key
+export GOOGLE_API_KEY="your-api-key-here"
+
+# 5. Start backend (Terminal 1)
+cd backend && uvicorn main:app --reload --port 8000
+
+# 6. Start frontend (Terminal 2)
+cd frontend && npm run dev
+
+# 7. Open http://localhost:3000
 ```
 
 ---

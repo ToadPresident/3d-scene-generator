@@ -1,6 +1,9 @@
 """
 Apple SHARP Service
 Converts single images to 3D Gaussian Splatting via SHARP CLI.
+
+Note: This requires the conda environment with SHARP to be activated before running uvicorn.
+Run: conda activate 3d-scene-gen
 """
 
 import asyncio
@@ -10,30 +13,11 @@ import os
 from pathlib import Path
 from typing import Optional
 
-# SHARP CLI path - update this if SHARP is installed elsewhere
-# Default: try to find in common locations
-SHARP_PATHS = [
-    "/opt/anaconda3/envs/sharp/bin/sharp",  # macOS conda
-    os.path.expanduser("~/anaconda3/envs/sharp/bin/sharp"),
-    os.path.expanduser("~/miniconda3/envs/sharp/bin/sharp"),
-    "sharp",  # Fallback to PATH
-]
 
-def get_sharp_path() -> str:
-    """Find the SHARP CLI executable."""
-    for path in SHARP_PATHS:
-        if path == "sharp":
-            # Check if in PATH
-            result = subprocess.run(["which", "sharp"], capture_output=True, text=True)
-            if result.returncode == 0:
-                return result.stdout.strip()
-        elif os.path.exists(path):
-            return path
-    raise RuntimeError(
-        "SHARP CLI not found. Please install SHARP:\n"
-        "  git clone https://github.com/apple/ml-sharp.git\n"
-        "  cd ml-sharp && pip install -r requirements.txt"
-    )
+def check_sharp_available() -> bool:
+    """Check if SHARP CLI is available in PATH."""
+    result = subprocess.run(["which", "sharp"], capture_output=True, text=True)
+    return result.returncode == 0
 
 
 async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
@@ -75,9 +59,16 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
         shutil.copy(image_path, input_image_path)
     
     # Run SHARP CLI
+    # Check if SHARP is available
+    if not check_sharp_available():
+        raise RuntimeError(
+            "SHARP CLI not found in PATH. Please activate the conda environment:\n"
+            "  conda activate 3d-scene-gen\n"
+            "Or run setup.sh to install all dependencies."
+        )
+    
     # SHARP command: sharp predict -i <input_dir> -o <output_dir>
-    sharp_path = get_sharp_path()
-    cmd = [sharp_path, "predict", "-i", str(input_dir), "-o", output_dir]
+    cmd = ["sharp", "predict", "-i", str(input_dir), "-o", output_dir]
     
     print(f"Running SHARP: {' '.join(cmd)}")
     
