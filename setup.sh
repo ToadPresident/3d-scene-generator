@@ -104,16 +104,12 @@ TEST_DIR="$PROJECT_ROOT/.setup_test"
 mkdir -p "$TEST_DIR/input" "$TEST_DIR/output"
 
 # Generate a simple 512x512 test image using Python
-"$ENV_PATH/bin/python" << 'PYTHON_SCRIPT'
+"$ENV_PATH/bin/python" -c "
 from PIL import Image
-import os
-test_dir = os.environ.get('TEST_DIR', '/tmp/setup_test')
 img = Image.new('RGB', (512, 512), color=(100, 150, 200))
-img.save(f"{test_dir}/input/test.png")
-print("Test image created")
-PYTHON_SCRIPT
-
-export TEST_DIR="$TEST_DIR"
+img.save('$TEST_DIR/input/test.png')
+print('Test image created')
+"
 
 # Run SHARP on test image (this triggers model download)
 echo "Running SHARP test (downloading model if needed)..."
