@@ -1,11 +1,10 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { Canvas } from "@react-three/fiber";
-import { Loader2, Eye, MousePointer2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, Eye } from "lucide-react";
 import dynamic from "next/dynamic";
 
-// Dynamic import for GaussianSplatViewer to avoid SSR issues with Three.js
+// Dynamic import for GaussianSplatViewer to avoid SSR issues
 const GaussianSplatViewer = dynamic(
   () => import("./GaussianSplatViewer"),
   { ssr: false }
@@ -22,24 +21,6 @@ export default function SceneViewer({
   isLoading,
   previewImageUrl,
 }: SceneViewerProps) {
-  const [isPointerLocked, setIsPointerLocked] = useState(false);
-  const [showHint, setShowHint] = useState(true);
-
-  // Track pointer lock state
-  useEffect(() => {
-    const handlePointerLockChange = () => {
-      setIsPointerLocked(document.pointerLockElement !== null);
-      if (document.pointerLockElement !== null) {
-        setShowHint(false);
-      }
-    };
-
-    document.addEventListener("pointerlockchange", handlePointerLockChange);
-    return () => {
-      document.removeEventListener("pointerlockchange", handlePointerLockChange);
-    };
-  }, []);
-
   // Show empty state when no scene
   if (!plyUrl && !isLoading) {
     return (
@@ -52,7 +33,7 @@ export default function SceneViewer({
             No Scene Yet
           </h2>
           <p className="text-sm text-zinc-500">
-            Enter a prompt and click "Generate Space" to create your first 3D scene.
+            Enter a prompt and click &quot;Generate Space&quot; to create your first 3D scene.
           </p>
         </div>
       </div>
@@ -93,42 +74,18 @@ export default function SceneViewer({
     );
   }
 
+  // Show 3D scene
   return (
-    <div className="w-full h-full relative canvas-container">
-      {/* Click to enter hint */}
-      {showHint && !isPointerLocked && (
-        <div className="pointer-lock-hint">
-          <MousePointer2 className="w-8 h-8 mx-auto mb-3 text-blue-400" />
-          <h3 className="text-white font-medium">Click to Enter</h3>
-          <p>Use WASD to move, mouse to look around</p>
-        </div>
-      )}
-
-      {/* ESC hint when locked */}
-      {isPointerLocked && (
-        <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-          <p className="text-xs text-zinc-400">Press ESC to exit</p>
-        </div>
-      )}
-
-      {/* 3D Canvas */}
-      <Canvas
-        camera={{
-          fov: 85, // Wide FOV for immersive feel
-          near: 0.01,
-          far: 1000,
-          position: [0, 0, 2], // Start slightly back
-        }}
-        gl={{
-          antialias: true,
-          powerPreference: "high-performance",
-        }}
-        style={{ width: "100%", height: "100%" }}
-      >
-        <Suspense fallback={null}>
-          {plyUrl && <GaussianSplatViewer plyUrl={plyUrl} />}
-        </Suspense>
-      </Canvas>
+    <div className="w-full h-full relative bg-black">
+      {/* Instructions overlay */}
+      <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg">
+        <p className="text-xs text-zinc-300">
+          🖱️ Drag to rotate &nbsp;|&nbsp; Scroll to zoom &nbsp;|&nbsp; Right-click to pan
+        </p>
+      </div>
+      
+      {/* gsplat.js viewer */}
+      {plyUrl && <GaussianSplatViewer plyUrl={plyUrl} />}
     </div>
   );
 }
