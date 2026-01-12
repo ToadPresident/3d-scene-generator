@@ -71,9 +71,11 @@ else
     cd "$SHARP_DIR" && git pull
 fi
 
-# Install SHARP dependencies
+# Install SHARP dependencies (must run from within ml-sharp directory)
 echo "Installing SHARP dependencies..."
-"$ENV_PATH/bin/pip" install -r "$SHARP_DIR/requirements.txt"
+cd "$SHARP_DIR"
+"$ENV_PATH/bin/pip" install -r requirements.txt
+cd "$PROJECT_ROOT"
 echo -e "${GREEN}✅ SHARP installed${NC}"
 
 echo ""
