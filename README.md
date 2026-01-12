@@ -57,8 +57,7 @@ The setup script will automatically:
 2. Clone and install [Apple SHARP](https://github.com/apple/ml-sharp) (with `pip install -e .`)
 3. Install backend Python dependencies
 4. Install frontend Node.js dependencies
-
-> **Note**: SHARP model weights (~2GB) will download automatically on first run.
+5. **Download SHARP model weights (~2GB)** and verify installation
 
 ### Hardware Support for SHARP
 
@@ -139,6 +138,8 @@ Then open **http://localhost:3000**
 │   ├── tailwind.config.ts
 │   └── next.config.mjs
 │
+├── setup.sh                    # One-command setup script
+├── start.sh                    # Start both services
 ├── docs/                       # Documentation assets
 ├── .gitignore
 └── README.md
@@ -223,10 +224,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### "sharp: command not found"
 
-Make sure you've activated the conda environment with SHARP installed:
+Make sure you've activated the conda environment:
 
 ```bash
-conda activate sharp
+conda activate 3d-scene-gen
 ```
 
 ### "Failed to load PLY"
