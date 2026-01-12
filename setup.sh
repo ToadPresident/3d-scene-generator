@@ -96,14 +96,51 @@ npm install
 echo -e "${GREEN}✅ Frontend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 6: Testing SHARP and downloading model weights (~2GB)...${NC}"
-echo -e "${YELLOW}   This may take 5-10 minutes on first run. Please wait...${NC}"
+echo -e "${BLUE}📦 Step 6: Downloading SHARP model weights (~2.6GB)...${NC}"
+echo -e "${YELLOW}   This may take 5-10 minutes. Please wait...${NC}"
 
-# Create a simple test image (solid color PNG)
+MODEL_DIR="$HOME/.cache/torch/hub/checkpoints"
+MODEL_FILE="$MODEL_DIR/sharp_2572gikvuh.pt"
+MODEL_URL="https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
+EXPECTED_MIN_SIZE=2600000000  # Minimum expected size (~2.6GB)
+
+mkdir -p "$MODEL_DIR"
+
+# Download model with curl (more reliable than torch.hub for large files)
+if [ -f "$MODEL_FILE" ]; then
+    ACTUAL_SIZE=$(stat -f%z "$MODEL_FILE" 2>/dev/null || stat -c%s "$MODEL_FILE" 2>/dev/null)
+    if [ "$ACTUAL_SIZE" -gt "$EXPECTED_MIN_SIZE" ]; then
+        echo -e "${GREEN}✅ Model already downloaded and verified${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Existing model file is incomplete, re-downloading...${NC}"
+        rm -f "$MODEL_FILE"
+    fi
+fi
+
+if [ ! -f "$MODEL_FILE" ]; then
+    echo "Downloading from Apple CDN..."
+    if curl -L --progress-bar -o "$MODEL_FILE" "$MODEL_URL"; then
+        ACTUAL_SIZE=$(stat -f%z "$MODEL_FILE" 2>/dev/null || stat -c%s "$MODEL_FILE" 2>/dev/null)
+        if [ "$ACTUAL_SIZE" -gt "$EXPECTED_MIN_SIZE" ]; then
+            echo -e "${GREEN}✅ Model downloaded successfully ($(numfmt --to=iec $ACTUAL_SIZE 2>/dev/null || echo "$ACTUAL_SIZE bytes"))${NC}"
+        else
+            echo -e "${RED}❌ Download incomplete. File size: $ACTUAL_SIZE bytes${NC}"
+            rm -f "$MODEL_FILE"
+            exit 1
+        fi
+    else
+        echo -e "${RED}❌ Download failed. Check your internet connection.${NC}"
+        exit 1
+    fi
+fi
+
+echo ""
+echo -e "${BLUE}📦 Step 7: Testing SHARP installation...${NC}"
+
+# Create a simple test image
 TEST_DIR="$PROJECT_ROOT/.setup_test"
 mkdir -p "$TEST_DIR/input" "$TEST_DIR/output"
 
-# Generate a simple 512x512 test image using Python
 "$ENV_PATH/bin/python" -c "
 from PIL import Image
 img = Image.new('RGB', (512, 512), color=(100, 150, 200))
@@ -111,17 +148,19 @@ img.save('$TEST_DIR/input/test.png')
 print('Test image created')
 "
 
-# Run SHARP on test image (this triggers model download)
-echo "Running SHARP test (downloading model if needed)..."
+# Run SHARP test
+echo "Running SHARP prediction test..."
 if "$ENV_PATH/bin/sharp" predict -i "$TEST_DIR/input" -o "$TEST_DIR/output" 2>&1; then
-    echo -e "${GREEN}✅ SHARP test passed - model downloaded and working${NC}"
+    # Check if PLY file was generated
+    if ls "$TEST_DIR/output"/*.ply 1>/dev/null 2>&1; then
+        echo -e "${GREEN}✅ SHARP test passed - PLY file generated${NC}"
+    else
+        echo -e "${RED}❌ SHARP ran but no PLY file generated${NC}"
+        rm -rf "$TEST_DIR"
+        exit 1
+    fi
 else
     echo -e "${RED}❌ SHARP test failed${NC}"
-    echo "   Check the error above. You may need to:"
-    echo "   1. Check your internet connection"
-    echo "   2. Manually download the model:"
-    echo "      curl -L -o ~/.cache/torch/hub/checkpoints/sharp_2572gikvuh.pt \\"
-    echo "        https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
     rm -rf "$TEST_DIR"
     exit 1
 fi
