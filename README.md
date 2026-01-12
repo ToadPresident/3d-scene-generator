@@ -70,107 +70,29 @@ SHARP supports multiple backends:
 
 ---
 
-## 🚀 Quick Start (One Command Setup)
+## 🚀 Quick Start
 
 ```bash
-# 1. Clone the repository
+# 1. Clone
 git clone https://github.com/YOUR_USERNAME/3d-scene-generator.git
 cd 3d-scene-generator
 
-# 2. Run setup script (installs everything including SHARP)
-chmod +x setup.sh
-./setup.sh
+# 2. Setup (installs SHARP, Python deps, Node deps)
+chmod +x setup.sh && ./setup.sh
 
 # 3. Activate environment
 conda activate 3d-scene-gen
 
-# 4. Set your API key
-export GOOGLE_API_KEY="your-api-key-here"
-
-# 5. Start backend (Terminal 1)
-cd backend && uvicorn main:app --reload --port 8000
-
-# 6. Start frontend (Terminal 2)
-cd frontend && npm run dev
-
-# 7. Open http://localhost:3000
-```
-
----
-
-## 🚀 Quick Start
-
-### Option 1: Local Development (Recommended)
-
-#### 1. Clone the Repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/3d-scene-generator.git
-cd 3d-scene-generator
-```
-
-#### 2. Setup Backend
-
-```bash
-# Activate your SHARP conda environment
-conda activate sharp
-
-# Navigate to backend
-cd backend
-
-# Install Python dependencies
-pip install -r requirements.txt
-
-# Set your Google API key
-export GOOGLE_API_KEY="your-api-key-here"
-
-# Start the server
-uvicorn main:app --reload --port 8000
-```
-
-#### 3. Setup Frontend (new terminal)
-
-```bash
-cd frontend
-
-# Install Node.js dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-#### 4. Open the App
-
-Navigate to **http://localhost:3000** in your browser.
-
----
-
-### Option 2: One-Click Script
-
-```bash
-# Run setup first (one-time)
-chmod +x setup.sh && ./setup.sh
-
-# Then start both services
+# 4. Set API key
 export GOOGLE_API_KEY="your-api-key"
+
+# 5. Start (one command)
 ./start.sh
 ```
 
----
+Then open **http://localhost:3000**
 
-### Option 3: Docker (Frontend Only)
-
-> ⚠️ **Note**: Docker can run the frontend, but SHARP requires local installation due to GPU/MPS access.
-
-```bash
-# Start frontend with Docker
-docker-compose up frontend
-
-# Run backend locally (in another terminal)
-conda activate sharp
-cd backend && uvicorn main:app --port 8000
-```
+> ✅ Model weights are downloaded during `setup.sh`, so first generation will be fast (~5 seconds).
 
 ---
 

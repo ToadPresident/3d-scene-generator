@@ -70,14 +70,38 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
     # SHARP command: sharp predict -i <input_dir> -o <output_dir>
     cmd = ["sharp", "predict", "-i", str(input_dir), "-o", output_dir]
     
-    print(f"Running SHARP: {' '.join(cmd)}")
+    # Check if this is likely first run (model not cached)
+    model_cache = Path.home() / ".cache" / "torch" / "hub" / "checkpoints" / "sharp_2572gikvuh.pt"
+    is_first_run = not model_cache.exists()
+    
+    if is_first_run:
+        print("=" * 60)
+        print("⏳ FIRST RUN: Downloading SHARP model weights (~2GB)...")
+        print("   This may take 5-10 minutes. Please wait...")
+        print("=" * 60)
+        timeout = 900  # 15 minutes for first run with model download
+    else:
+        print(f"Running SHARP: {' '.join(cmd)}")
+        timeout = 120  # 2 minutes for subsequent runs
     
     # Run in thread pool to avoid blocking async event loop
     loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
-        None,
-        lambda: subprocess.run(cmd, capture_output=True, text=True, timeout=120)
-    )
+    try:
+        result = await loop.run_in_executor(
+            None,
+            lambda: subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        )
+    except subprocess.TimeoutExpired:
+        if is_first_run:
+            raise RuntimeError(
+                "SHARP timed out during model download. This can happen on slow connections.\n"
+                "Please download the model manually:\n"
+                "  curl -L -o ~/.cache/torch/hub/checkpoints/sharp_2572gikvuh.pt \\\n"
+                "    https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt\n"
+                "Then try again."
+            )
+        else:
+            raise RuntimeError(f"SHARP timed out after {timeout} seconds")
     
     print(f"SHARP stdout: {result.stdout}")
     print(f"SHARP stderr: {result.stderr}")

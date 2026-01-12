@@ -96,19 +96,46 @@ npm install
 echo -e "${GREEN}✅ Frontend dependencies installed${NC}"
 
 echo ""
-echo -e "${BLUE}📦 Step 6: Verifying SHARP installation...${NC}"
-if "$ENV_PATH/bin/sharp" --help > /dev/null 2>&1; then
-    echo -e "${GREEN}✅ SHARP CLI is working${NC}"
+echo -e "${BLUE}📦 Step 6: Testing SHARP and downloading model weights (~2GB)...${NC}"
+echo -e "${YELLOW}   This may take 5-10 minutes on first run. Please wait...${NC}"
+
+# Create a simple test image (solid color PNG)
+TEST_DIR="$PROJECT_ROOT/.setup_test"
+mkdir -p "$TEST_DIR/input" "$TEST_DIR/output"
+
+# Generate a simple 512x512 test image using Python
+"$ENV_PATH/bin/python" << 'PYTHON_SCRIPT'
+from PIL import Image
+import os
+test_dir = os.environ.get('TEST_DIR', '/tmp/setup_test')
+img = Image.new('RGB', (512, 512), color=(100, 150, 200))
+img.save(f"{test_dir}/input/test.png")
+print("Test image created")
+PYTHON_SCRIPT
+
+export TEST_DIR="$TEST_DIR"
+
+# Run SHARP on test image (this triggers model download)
+echo "Running SHARP test (downloading model if needed)..."
+if "$ENV_PATH/bin/sharp" predict -i "$TEST_DIR/input" -o "$TEST_DIR/output" 2>&1; then
+    echo -e "${GREEN}✅ SHARP test passed - model downloaded and working${NC}"
 else
-    echo -e "${RED}❌ SHARP CLI verification failed${NC}"
+    echo -e "${RED}❌ SHARP test failed${NC}"
+    echo "   Check the error above. You may need to:"
+    echo "   1. Check your internet connection"
+    echo "   2. Manually download the model:"
+    echo "      curl -L -o ~/.cache/torch/hub/checkpoints/sharp_2572gikvuh.pt \\"
+    echo "        https://ml-site.cdn-apple.com/models/sharp/sharp_2572gikvuh.pt"
+    rm -rf "$TEST_DIR"
     exit 1
 fi
+
+# Cleanup test files
+rm -rf "$TEST_DIR"
 
 echo ""
 echo "=============================================="
 echo -e "${GREEN}🎉 Setup complete!${NC}"
-echo ""
-echo -e "${YELLOW}⚠️  NOTE: First run will download model weights (~2GB)${NC}"
 echo ""
 echo "To start the application:"
 echo ""
@@ -118,12 +145,8 @@ echo ""
 echo -e "${YELLOW}2. Set your Google API key:${NC}"
 echo "   export GOOGLE_API_KEY=\"your-api-key-here\""
 echo ""
-echo -e "${YELLOW}3. Start the app (one command):${NC}"
+echo -e "${YELLOW}3. Start the app:${NC}"
 echo "   ./start.sh"
-echo ""
-echo -e "${YELLOW}   Or manually:${NC}"
-echo "   Terminal 1: cd backend && uvicorn main:app --reload --port 8000"
-echo "   Terminal 2: cd frontend && npm run dev"
 echo ""
 echo -e "${YELLOW}4. Open in browser:${NC}"
 echo "   http://localhost:3000"
