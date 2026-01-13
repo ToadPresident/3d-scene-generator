@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import PromptPanel from "@/components/PromptPanel";
 import SceneViewer from "@/components/SceneViewer";
+
+// API URL - uses environment variable or falls back to localhost
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface GenerationResult {
   plyUrl: string;
@@ -14,16 +17,37 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerationResult | null>(null);
+  const [apiKey, setApiKey] = useState("");
+
+  // Load API key from localStorage on mount
+  useEffect(() => {
+    const savedKey = localStorage.getItem("gemini_api_key");
+    if (savedKey) {
+      setApiKey(savedKey);
+    }
+  }, []);
+
+  // Save API key to localStorage when it changes
+  const handleApiKeyChange = useCallback((key: string) => {
+    setApiKey(key);
+    localStorage.setItem("gemini_api_key", key);
+  }, []);
 
   const handleGenerate = useCallback(async (prompt: string) => {
+    if (!apiKey) {
+      setError("Please enter your Gemini API Key first");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8000/api/generate", {
+      const response = await fetch(`${API_URL}/api/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-API-Key": apiKey,
         },
         body: JSON.stringify({ prompt }),
       });
@@ -37,8 +61,8 @@ export default function Home() {
 
       if (data.success) {
         setResult({
-          plyUrl: `http://localhost:8000${data.ply_url}`,
-          imageUrl: `http://localhost:8000${data.image_url}`,
+          plyUrl: `${API_URL}${data.ply_url}`,
+          imageUrl: `${API_URL}${data.image_url}`,
           generationTimeMs: data.generation_time_ms,
         });
       } else {
@@ -49,7 +73,7 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [apiKey]);
 
   return (
     <main className="flex h-screen w-screen overflow-hidden bg-background">
@@ -60,6 +84,8 @@ export default function Home() {
           isLoading={isLoading}
           error={error}
           generationTime={result?.generationTimeMs}
+          apiKey={apiKey}
+          onApiKeyChange={handleApiKeyChange}
         />
       </div>
 

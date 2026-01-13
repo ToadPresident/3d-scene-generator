@@ -10,7 +10,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -48,10 +48,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS - Allow frontend access
+# CORS - Allow frontend access (local and cloud deployments)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://127.0.0.1:3000",
+        "http://localhost:3002", 
+        "http://127.0.0.1:3002",
+        "https://*.vercel.app",  # Vercel deployments
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Dynamic Vercel preview URLs
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -80,7 +87,7 @@ async def health_check():
 
 
 @app.post("/api/generate", response_model=GenerateResponse)
-async def generate_scene(request: GenerateRequest):
+async def generate_scene(request: GenerateRequest, x_api_key: str = Header(..., alias="X-API-Key")):
     """
     Generate a 3D scene from a text prompt.
     
@@ -93,6 +100,9 @@ async def generate_scene(request: GenerateRequest):
     """
     import time
     start_time = time.time()
+    
+    # Set the API key from the request header
+    os.environ["GOOGLE_API_KEY"] = x_api_key
     
     try:
         # Generate unique session ID

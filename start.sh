@@ -17,17 +17,15 @@ ENV_NAME="3d-scene-gen"
 echo "🚀 Starting 3D Scene Generator..."
 echo ""
 
-# Check for Google API key
+# Check for Google API key (optional - users can also provide via UI)
 if [ -z "$GOOGLE_API_KEY" ]; then
-    echo -e "${RED}❌ Error: GOOGLE_API_KEY not set${NC}"
+    echo -e "${YELLOW}ℹ️  GOOGLE_API_KEY not set in environment${NC}"
+    echo "   Users will need to enter their API key in the web UI"
+    echo "   Get a key from: https://aistudio.google.com/apikey"
     echo ""
-    echo "Please set your API key first:"
-    echo "  export GOOGLE_API_KEY=\"your-api-key-here\""
-    echo ""
-    echo "Get your API key from: https://aistudio.google.com/apikey"
-    exit 1
+else
+    echo -e "${GREEN}✅ GOOGLE_API_KEY is set (fallback mode)${NC}"
 fi
-echo -e "${GREEN}✅ GOOGLE_API_KEY is set${NC}"
 
 # Get conda path
 CONDA_BASE=$(conda info --base 2>/dev/null)

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Sparkles, Loader2, AlertCircle, Clock } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Sparkles, Loader2, AlertCircle, Clock, Github, Linkedin, ChevronDown, ChevronUp, Key } from "lucide-react";
 
 interface PromptPanelProps {
   onGenerate: (prompt: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
   generationTime?: number;
+  apiKey: string;
+  onApiKeyChange: (key: string) => void;
 }
 
 // Example prompts - visually interesting scenes with depth
@@ -29,8 +31,12 @@ export default function PromptPanel({
   isLoading,
   error,
   generationTime,
+  apiKey,
+  onApiKeyChange,
 }: PromptPanelProps) {
   const [prompt, setPrompt] = useState("");
+  const [showExamples, setShowExamples] = useState(false);
+  const [showApiKey, setShowApiKey] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +62,43 @@ export default function PromptPanel({
         </p>
       </div>
 
+      {/* API Key Input */}
+      <div className="mb-4">
+        <button
+          type="button"
+          onClick={() => setShowApiKey(!showApiKey)}
+          className="flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200 mb-2 transition-colors"
+        >
+          <Key className="w-4 h-4" />
+          {apiKey ? "API Key Set ✓" : "Set Gemini API Key"}
+          {showApiKey ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </button>
+        {showApiKey && (
+          <div className="space-y-2">
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => onApiKeyChange(e.target.value)}
+              placeholder="Enter your Gemini API Key"
+              className="w-full px-4 py-2 bg-muted border border-border rounded-lg 
+                         text-white placeholder-zinc-500 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <p className="text-xs text-zinc-500">
+              Get your free API key from{" "}
+              <a 
+                href="https://aistudio.google.com/apikey" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                Google AI Studio
+              </a>
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* Prompt Form */}
       <form onSubmit={handleSubmit} className="flex flex-col flex-1">
         <div className="mb-4">
@@ -78,23 +121,32 @@ export default function PromptPanel({
           />
         </div>
 
-        {/* Example Prompts */}
+        {/* Example Prompts - Collapsible */}
         <div className="mb-6">
-          <p className="text-xs text-zinc-500 mb-2">Try these examples:</p>
-          <div className="flex flex-wrap gap-2">
-            {EXAMPLE_PROMPTS.map((example, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => handleExampleClick(example)}
-                className="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 
-                           rounded-full text-zinc-400 hover:text-white
-                           transition-colors duration-200 truncate max-w-[200px]"
-              >
-                {example.slice(0, 25)}...
-              </button>
-            ))}
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowExamples(!showExamples)}
+            className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-300 transition-colors mb-2"
+          >
+            {showExamples ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            Try these examples
+          </button>
+          {showExamples && (
+            <div className="flex flex-wrap gap-2">
+              {EXAMPLE_PROMPTS.map((example, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleExampleClick(example)}
+                  className="text-xs px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 
+                             rounded-full text-zinc-400 hover:text-white
+                             transition-colors duration-200 truncate max-w-[200px]"
+                >
+                  {example.slice(0, 25)}...
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Generate Button */}
@@ -153,6 +205,29 @@ export default function PromptPanel({
             <li>• <b>Scroll</b> - Zoom in/out</li>
             <li>• Click canvas first to enable keyboard</li>
           </ul>
+        </div>
+
+        {/* Social Links */}
+        <div className="pt-4 flex items-center gap-3">
+          <a
+            href="https://github.com/ToadPresident/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all duration-200"
+            title="GitHub"
+          >
+            <Github className="w-5 h-5" />
+          </a>
+          <a
+            href="https://www.linkedin.com/in/xinwei-wang-525a41358"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-[#0A66C2] transition-all duration-200"
+            title="LinkedIn"
+          >
+            <Linkedin className="w-5 h-5" />
+          </a>
+
         </div>
       </form>
     </div>

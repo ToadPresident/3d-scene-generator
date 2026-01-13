@@ -8,8 +8,12 @@ from google import genai
 from google.genai import types
 
 
-# Initialize client (uses GOOGLE_API_KEY env var or Application Default Credentials)
-client = genai.Client()
+def get_client():
+    """Get Gemini client using API key from environment variable."""
+    api_key = os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise ValueError("GOOGLE_API_KEY not set. Please provide API key via the web UI.")
+    return genai.Client(api_key=api_key)
 
 
 async def generate_concept_image(prompt: str, output_path: str) -> str:
@@ -23,6 +27,9 @@ async def generate_concept_image(prompt: str, output_path: str) -> str:
     Returns:
         Path to the saved image
     """
+    # Get client with current API key
+    client = get_client()
+    
     # Enhance prompt for optimal single-image 3D reconstruction
     # Generate panoramic, edge-filling composition to minimize black borders
     enhanced_prompt = (
