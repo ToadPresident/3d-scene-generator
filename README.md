@@ -2,7 +2,8 @@
 
 > Transform text prompts into immersive 3D environments in seconds
 
-[![Demo](https://img.shields.io/badge/🚀_Try_Live_Demo-blue?style=for-the-badge)](https://your-vercel-app.vercel.app)
+[![Demo](https://img.shields.io/badge/🚀_Try_Live_Demo-blue?style=for-the-badge)](https://3d-scene-generator.vercel.app)
+[![HuggingFace](https://img.shields.io/badge/🤗_HuggingFace_Space-yellow?style=for-the-badge)](https://huggingface.co/spaces/ToadPres/3d-scene-generator)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Python](https://img.shields.io/badge/python-3.13-green.svg)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)
@@ -27,7 +28,7 @@ A web-based demo combining **Google Gemini 2.5 Flash Image** for AI image genera
 
 ### Option 1: Cloud Demo (Recommended)
 
-1. Visit the [Live Demo](https://your-vercel-app.vercel.app)
+1. Visit the [Live Demo](https://3d-scene-generator.vercel.app)
 2. Click **"Set Gemini API Key"** and enter your key ([Get one free](https://aistudio.google.com/apikey))
 3. Describe a scene and click **Generate Space**
 
