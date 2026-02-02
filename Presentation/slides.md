@@ -35,6 +35,7 @@ title: Instant World Creation
 ---
 layout: image-right
 image: ./images/slide2-studio.png
+
 ---
 
 # 1. The Bottleneck
@@ -58,6 +59,7 @@ Before we talk about AI, let's look at how we used to build 3D worlds.
 ---
 layout: center
 class: text-center
+
 ---
 
 # The Conclusion
@@ -94,6 +96,7 @@ We need a **Feed-Forward** approach.
   </div>
 
 </div>
+
 ---
 layout: two-cols
 ---
@@ -158,6 +161,7 @@ Unlike NeRF (which "memorizes" a scene), SHARP **"understands"** geometry.
 ---
 layout: image-right
 image: ./images/slide4-architecture.png
+
 ---
 
 # Capabilities & Analogy
@@ -175,6 +179,7 @@ Just like **Stable Diffusion** changed 2D art, **SHARP** changes 3D assets.
 - **Key Capabilities:**
   1.  **Generalization:** Works on cats, cars, buildings, and abstract art.
   2.  **View Consistency:** It hallucinates the "back" of the object logically (thanks to training on Objaverse-XL).
+
 ---
 layout: default
 ---
@@ -206,6 +211,7 @@ Before we look at the chart, we must understand **what we are measuring**.
   </div>
 
 </div>
+
 ---
 layout: default
 ---
@@ -215,47 +221,32 @@ layout: default
 Comparison against SOTA methods (LGM, Splatter Image, OpenLRM).
 
 <div class="mt-10 relative">
-  
-  <div class="space-y-6 font-mono text-sm">
-    
-    <div>
-      <div class="flex justify-between mb-1">
-        <span>LGM (Large Gaussian Model)</span>
-        <span>LPIPS: 0.19</span>
-      </div>
-      <div class="w-full bg-gray-800 rounded h-4">
-        <div class="bg-gray-500 h-4 rounded" style="width: 70%"></div>
-      </div>
-    </div>
+<div class="space-y-6 font-mono text-sm">
 
-    <div>
-      <div class="flex justify-between mb-1">
-        <span>OpenLRM</span>
-        <span>LPIPS: 0.18</span>
-      </div>
-      <div class="w-full bg-gray-800 rounded h-4">
-        <div class="bg-gray-500 h-4 rounded" style="width: 65%"></div>
-      </div>
-    </div>
+<div>
+<div class="flex justify-between mb-1"><span>LGM (Large Gaussian Model)</span><span>LPIPS: 0.19</span></div>
+<div class="w-full bg-gray-800 rounded h-4"><div class="bg-gray-500 h-4 rounded" style="width: 70%"></div></div>
+</div>
 
-    <div>
-      <div class="flex justify-between mb-1 text-cyan-400 font-bold">
-        <span>Apple SHARP (Ours)</span>
-        <span>LPIPS: 0.14 (Best)</span>
-      </div>
-      <div class="w-full bg-gray-800 rounded h-4 shadow-[0_0_15px_rgba(0,255,255,0.4)]">
-        <div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-4 rounded" style="width: 40%"></div>
-      </div>
-    </div>
+<div>
+<div class="flex justify-between mb-1"><span>OpenLRM</span><span>LPIPS: 0.18</span></div>
+<div class="w-full bg-gray-800 rounded h-4"><div class="bg-gray-500 h-4 rounded" style="width: 65%"></div></div>
+</div>
 
-  </div>
-
-  <div class="mt-8 text-center glass-card py-4">
-    <h3 class="text-2xl font-bold">Speed Advantage</h3>
-    <p class="mt-2">SHARP is <span class="text-green-400 font-bold">3x faster</span> than LGM and <span class="text-green-400 font-bold">2000x faster</span> than DreamFusion.</p>
-  </div>
+<div>
+<div class="flex justify-between mb-1 text-cyan-400 font-bold"><span>Apple SHARP (Ours)</span><span>LPIPS: 0.14 (Best)</span></div>
+<div class="w-full bg-gray-800 rounded h-4 shadow-[0_0_15px_rgba(0,255,255,0.4)]"><div class="bg-gradient-to-r from-cyan-500 to-blue-500 h-4 rounded" style="width: 40%"></div></div>
+</div>
 
 </div>
+
+<div class="mt-8 text-center glass-card py-4">
+<h3 class="text-2xl font-bold">Speed Advantage</h3>
+<p class="mt-2">SHARP is <span class="text-green-400 font-bold">3x faster</span> than LGM and <span class="text-green-400 font-bold">2000x faster</span> than DreamFusion.</p>
+</div>
+
+</div>
+
 ---
 layout: center
 ---
@@ -332,6 +323,7 @@ Our implementation uses `apple/ml-sharp` + Gemini 2.5 Flash.
 ---
 layout: center
 preload: false
+
 ---
 
 # Live Preview: 3D Scene Generator
@@ -399,6 +391,7 @@ const BOUNDS = {
 ---
 layout: image-right
 image: ./images/slide13-physics.png
+
 ---
 
 # 5. Future Outlook
@@ -414,6 +407,7 @@ An AI that simulates the physics and dynamics of reality, not just the pixels.
 - **Fei-Fei Li (Spatial Intelligence):** "AI must move from 'Seeing' to 'Acting' in 3D space."
 - **Project Marble:**
   Our goal is to stitch these single objects into a coherent environment.
+
 ---
 layout: default
 ---
@@ -438,9 +432,9 @@ Current Limitations vs. Future Tech:
 <div class="glass-card border-purple-500 border">
 <h3 class="text-purple-400 mb-2 font-bold">Future (4D & Physics)</h3>
 <ul class="list-disc pl-5 space-y-2 text-sm">
-<li>**4D Gaussian Splatting:** Time-variant scenes (e.g., flowing water, fire).</li>
-<li>**PhysGaussian:** Interactive physics (Soft body simulation, bouncing).</li>
-<li>**Scene Composition:** Layout generation via LLMs.</li>
+<li><strong>4D Gaussian Splatting:</strong> Time-variant scenes (e.g., flowing water, fire).</li>
+<li><strong>PhysGaussian:</strong> Interactive physics (Soft body simulation, bouncing).</li>
+<li><strong>Scene Composition:</strong> Layout generation via LLMs.</li>
 </ul>
 </div>
 
@@ -449,14 +443,15 @@ Current Limitations vs. Future Tech:
 ---
 layout: center
 class: text-center
+
 ---
 
 # Thank You
 
 <div class="flex flex-col items-center mt-10">
 <div class="text-6xl mb-4">🚀</div>
-<h2 class="text-2xl font-bold">Project CineLux / Marble</h2>
-<p class="opacity-60 mt-2">Instant 3D Generation Pipeline</p>
+<h2 class="text-2xl font-bold">深度学习期末项目</h2>
+<p class="opacity-60 mt-2">Text-to-3D Instant Generation</p>
 
 <div class="mt-8 grid grid-cols-2 gap-8 text-left text-sm font-mono opacity-80">
 <div>
