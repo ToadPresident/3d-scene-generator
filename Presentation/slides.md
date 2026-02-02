@@ -30,10 +30,8 @@ title: Instant World Creation
 </div>
 
 ---
-
 layout: image-right
 image: ./images/slide2-studio.png
-
 ---
 
 <div class="ml-4">
@@ -89,10 +87,8 @@ The first traditional approach to 3D reconstruction: scanning from the real worl
 </div>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # The Revolution: Feed-Forward
@@ -152,7 +148,6 @@ _Released: Dec 2025 (CVPR 2026 Submission)_
   </div>
   <p class="text-xs italic">"SHARP is the first model that actually makes Gaussian Splatting viable for mobile apps."</p>
 </div>
-
 ---
 
 # Feed-Forward Architecture
@@ -179,7 +174,6 @@ Unlike NeRF (which "memorizes" scenes), SHARP **"understands"** geometry.
 <div class="mt-6 p-4 border border-dashed border-gray-600 rounded text-center text-sm font-mono">
   Image (Pixels) → Neural Network → 3D Gaussians (Geometry)
 </div>
-
 ---
 
 # Technical Details: Why So Strong?
@@ -211,10 +205,8 @@ Unlike NeRF (which "memorizes" scenes), SHARP **"understands"** geometry.
 </div>
 
 ---
-
 layout: image-right
 image: ./images/slide4-architecture.png
-
 ---
 
 # Capabilities & Analogy
@@ -353,10 +345,8 @@ View on GitHub →
 </div>
 
 ---
-
 layout: center
 preload: false
-
 ---
 
 # Live Preview: 3D Scene Generator
@@ -377,10 +367,9 @@ Our deployed demo on **HuggingFace Space**.
 <div class="mt-4 text-sm opacity-50">
 (Click to open in new tab - HF Space requires external access)
 </div>
-
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # Engineering Challenges
 
@@ -447,7 +436,6 @@ const BOUNDS = {
 <div class="mt-8 text-center">
 <p class="text-xl">World Model = Simulates not just pixels, but <strong>physics and dynamics</strong></p>
 </div>
-
 ---
 
 # 3DGS Applications
@@ -479,7 +467,6 @@ const BOUNDS = {
 <div class="mt-8 text-center glass-card py-4">
 <p class="text-lg">3DGS is becoming the infrastructure for <strong>Spatial Intelligence</strong></p>
 </div>
-
 ---
 
 # Future Tech: 4D & Physics
@@ -513,10 +500,8 @@ const BOUNDS = {
 </div>
 
 ---
-
 layout: center
 class: text-center
-
 ---
 
 # Thank You
