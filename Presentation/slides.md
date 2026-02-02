@@ -1,6 +1,6 @@
 ---
 theme: default
-background: ./images/slide1-bg.png
+background: ./images/slide1-ntu-classroom.png
 class: text-center
 highlighter: shiki
 lineNumbers: false
@@ -13,86 +13,100 @@ title: Instant World Creation
 
 <div class="bg-overlay"></div>
 
-<div class="pt-40">
-  <div class="glass-card inline-block px-8 py-4 mb-6 border-cyan-500/50">
-    <span class="text-cyan-400 font-mono">Input: "A Cyberpunk City"</span> 
-    <span class="mx-2">→</span> 
-    <span class="text-purple-400 font-mono">Output: 3D World</span>
-  </div>
-
+<div class="pt-32">
   <h1 class="text-6xl font-black mb-4 text-white drop-shadow-lg">
     Instant World Creation
   </h1>
-  <p class="text-2xl opacity-80 mb-8 font-light">
+  <p class="text-3xl opacity-90 mb-4 font-light">
+    "一句话生成3D世界"
+  </p>
+  <p class="text-xl opacity-70 mb-8">
     From Generative Priors to Feed-Forward Geometry
   </p>
   
   <div class="absolute bottom-10 left-0 w-full text-center opacity-50 text-sm font-mono">
-    Powered by Google Nano Banana & Apple SHARP
+    深度学习期末项目 · Powered by Apple SHARP
   </div>
 </div>
 
 ---
-
 layout: image-right
 image: ./images/slide2-studio.png
-
 ---
+
+<div class="ml-4">
 
 # 1. The Bottleneck
 
-### Traditional 3D Reconstruction
+### Photogrammetry (摄影测量)
 
-Before we talk about AI, let's look at how we used to build 3D worlds.
+传统3D重建的第一种方法：从现实世界扫描。
 
 <br>
 
-- **Photogrammetry (Scanning):**
-  - Requires physical objects.
-  - Needs complex camera rigs & controlled lighting.
-  - **Pain Point:** You can't scan what doesn't exist.
+- **原理:** 使用多角度照片重建3D模型
+- **需求:**
+  - 物理对象必须存在
+  - 复杂的相机阵列 + 受控光线
+- **痛点:**
+  - <strong>无法扫描不存在的东西</strong>
+  - 无法用于创意内容生成
 
-- **NeRF / Optimization-based 3DGS:**
-  - Requires 50-100 overlapping images per scene.
-  - **Training Time:** 30 mins to 1 hour _per object_.
-  - **Pain Point:** "Optimization" means retraining the network for every single new apple or chair.
+</div>
 
 ---
 
+# NeRF & Optimization-based 3DGS
+
+### 优化式方法：每个场景都要"重新训练"
+
+<div class="grid grid-cols-2 gap-8 mt-8">
+
+<div class="glass-card">
+<h3 class="text-cyan-400 font-bold mb-4">NeRF (Neural Radiance Fields)</h3>
+<ul class="list-disc pl-5 space-y-2 text-sm">
+<li>需要 50-100 张重叠图像</li>
+<li>训练时间：30分钟 - 1小时 <strong>每个物体</strong></li>
+<li>输出：隐式神经场（需要ray marching）</li>
+</ul>
+</div>
+
+<div class="glass-card">
+<h3 class="text-purple-400 font-bold mb-4">3D Gaussian Splatting (3DGS)</h3>
+<ul class="list-disc pl-5 space-y-2 text-sm">
+<li>同样需要多视角图像</li>
+<li>更快的渲染（实时）</li>
+<li>但仍需 <strong>逐场景优化</strong></li>
+</ul>
+</div>
+
+</div>
+
+<div class="mt-8 text-center text-2xl font-bold text-red-400">
+  痛点：每个新物体都要重新训练 → 无法规模化
+</div>
+
+---
 layout: center
 class: text-center
-
 ---
 
-# The Conclusion
+# The Revolution: Feed-Forward
 
 <div class="text-4xl font-bold mt-10 leading-relaxed">
-  "With traditional methods,<br>
-  <span class="text-red-500">Real-time Generation</span> is Impossible."
+  从 "优化" 到 "预测"
 </div>
 
-<div class="mt-12 opacity-80 max-w-2xl mx-auto text-lg">
-  If it takes 20 minutes to generate one asset, we cannot build a dynamic "World Model". We hit a wall in scalability.
-</div>
----
-layout: default
----
-
-# The Revolution: Seconds, Not Minutes
-
-How do we break the barrier?
-We need a **Feed-Forward** approach.
-
-<div class="grid grid-cols-2 gap-12 mt-12 items-center">
+<div class="grid grid-cols-2 gap-12 mt-12 items-center max-w-3xl mx-auto">
   
   <div class="glass-card text-center py-10 opacity-50 grayscale">
-    <div class="text-2xl mb-2">Old: Optimization</div>
+    <div class="text-2xl mb-2">旧方法: Optimization</div>
     <div class="text-sm">Iterative Gradient Descent</div>
     <div class="text-4xl font-mono mt-4 text-red-400">~40 Mins</div>
   </div>
 
   <div class="glass-card text-center py-10 border-cyan-500 border-2 shadow-[0_0_30px_rgba(0,255,255,0.3)]">
-    <div class="text-2xl mb-2 font-bold text-cyan-300">New: Feed-Forward</div>
+    <div class="text-2xl mb-2 font-bold text-cyan-300">新方法: Feed-Forward</div>
     <div class="text-sm">Direct Neural Prediction</div>
     <div class="text-6xl font-black mt-4 text-cyan-400 animate-pulse">0.2 Sec</div>
   </div>
@@ -100,22 +114,25 @@ We need a **Feed-Forward** approach.
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 2. Apple SHARP
 
 ### Context & Community Impact
 
 **Apple SHARP** (Sharp Monocular View Synthesis)
+
 _Released: Dec 2025 (CVPR 2026 Submission)_
 
 <br>
 
-- **Community Reaction:**
-  - **GitHub Stars:** 5.2k+ in first month.
-  - **Twitter/X:** Widely praised as the "Midjourney for 3D".
-  - **Why the hype?** It was the first time a mobile-optimized model achieved SOTA quality on par with desktop GPUs.
+- **社区反应:**
+  - GitHub Stars: **5.2k+** (第一个月)
+  - Twitter/X: 被称为 "Midjourney for 3D"
+- **为什么火爆?**
+  - 首个移动端优化的 SOTA 模型
+  - 桌面GPU级别的质量
 
 ::right::
 
@@ -129,99 +146,122 @@ _Released: Dec 2025 (CVPR 2026 Submission)_
     <div class="w-8 h-8 rounded-full bg-gray-500"></div>
     <div class="text-sm font-bold">AI Researcher @ X</div>
   </div>
-  <p class="text-xs italic">"SHARP is the first model that actually makes Gaussian Splatting viable for mobile apps. The inference speed is insane."</p>
+  <p class="text-xs italic">"SHARP is the first model that actually makes Gaussian Splatting viable for mobile apps."</p>
 </div>
+
 ---
-layout: default
----
 
-# Technical Deep Dive
+# Feed-Forward 原理
 
-### What is a "Feed-Forward" Model?
+### 什么是 "前馈" 模型？
 
-Unlike NeRF (which "memorizes" a scene), SHARP **"understands"** geometry.
+不同于 NeRF（"记忆" 场景），SHARP **"理解"** 几何。
 
 <div class="grid grid-cols-3 gap-4 mt-8">
   <div class="col-span-1 glass-card">
-    <h4 class="text-cyan-400 font-bold">1. The Encoder</h4>
-    <p class="text-sm mt-2">Takes the 2D image and extracts "Deep Features" (Texture, Edges, Semantic meaning).</p>
+    <h4 class="text-cyan-400 font-bold">1. Encoder</h4>
+    <p class="text-sm mt-2">提取2D图像的深层特征（纹理、边缘、语义）</p>
   </div>
   <div class="col-span-1 glass-card">
-    <h4 class="text-purple-400 font-bold">2. The Predictor</h4>
-    <p class="text-sm mt-2">A Transformer network predicts the 3D position (XYZ) and shape (Covariance) of thousands of Gaussians.</p>
+    <h4 class="text-purple-400 font-bold">2. Predictor</h4>
+    <p class="text-sm mt-2">Transformer预测数千个高斯的3D位置(XYZ)和形状(协方差)</p>
   </div>
   <div class="col-span-1 glass-card">
-    <h4 class="text-green-400 font-bold">3. The Output</h4>
-    <p class="text-sm mt-2">Directly outputs a `.ply` point cloud. No loops, no iterations. One pass.</p>
+    <h4 class="text-green-400 font-bold">3. Output</h4>
+    <p class="text-sm mt-2">直接输出 `.ply` 点云。无循环，无迭代，一次通过。</p>
   </div>
 </div>
 
 <div class="mt-6 p-4 border border-dashed border-gray-600 rounded text-center text-sm font-mono">
-  Image (Pixels) $\rightarrow$ Neural Network $\rightarrow$ 3D Gaussians (Geometry)
+  Image (Pixels) → Neural Network → 3D Gaussians (Geometry)
 </div>
 
 ---
 
-layout: image-right
-image: ./images/slide4-architecture.png
+# 技术细节：为什么这么强？
+
+<div class="text-left max-w-3xl mx-auto space-y-6 mt-8">
+  <div class="flex items-start gap-4">
+    <div class="bg-cyan-500 text-black font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">1</div>
+    <div>
+      <h4 class="font-bold text-xl">Epipolar Constraints (对极约束)</h4>
+      <p class="opacity-80">SHARP 不是随机猜测，它在网络层内部强制执行视觉的物理定律（对极几何）。</p>
+    </div>
+  </div>
+
+  <div class="flex items-start gap-4">
+    <div class="bg-cyan-500 text-black font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">2</div>
+    <div>
+      <h4 class="font-bold text-xl">高质量训练数据</h4>
+      <p class="opacity-80">在 Objaverse-XL 的精选子集上训练，过滤了低质量网格。</p>
+    </div>
+  </div>
+
+  <div class="flex items-start gap-4">
+    <div class="bg-cyan-500 text-black font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">3</div>
+    <div>
+      <h4 class="font-bold text-xl">高效架构</h4>
+      <p class="opacity-80">移动端优化，可在 iPhone/iPad 上实时运行。</p>
+    </div>
+  </div>
+</div>
 
 ---
+layout: image-right
+image: ./images/slide4-architecture.png
+---
 
-# Capabilities & Analogy
+# 能力与类比
 
-### The "Diffusion Moment" for 3D
+### "Stable Diffusion for 3D"
 
-Just like **Stable Diffusion** changed 2D art, **SHARP** changes 3D assets.
+就像 **Stable Diffusion** 改变了2D艺术，**SHARP** 改变了3D资产。
 
 <br>
 
-- **Analogy:**
-  - **Text-to-Image:** You type "Cat", you get a JPG (0.5s).
-  - **Image-to-3D:** You feed the JPG, you get a 3D Model (0.2s).
+- **类比:**
+  - **Text-to-Image:** 输入"猫"，0.5秒得到 JPG
+  - **Image-to-3D:** 输入 JPG，0.2秒得到3D模型
 
-- **Key Capabilities:**
-  1.  **Generalization:** Works on cats, cars, buildings, and abstract art.
-  2.  **View Consistency:** It hallucinates the "back" of the object logically (thanks to training on Objaverse-XL).
+- **关键能力:**
+  1. **泛化:** 猫、车、建筑、抽象艺术都能处理
+  2. **视图一致性:** 合理"幻想"物体背面
 
 ---
 
-## layout: default
-
 # 3. Benchmarks
 
-### Defining "Quality" in 3D Generative AI
+### 定义3D生成AI的"质量"
 
-Before we look at the chart, we must understand **what we are measuring**.
+在看数据之前，我们必须理解 **衡量标准**。
 
 <div class="flex gap-4 mt-8 text-left">
   
   <div class="flex-1 glass-card border-l-4 border-blue-500">
     <h3 class="font-bold text-lg">PSNR / SSIM</h3>
-    <p class="text-xs mt-2 opacity-70">"Pixel Perfectness"</p>
-    <p class="text-sm mt-2">Traditional signal processing metrics. Measures how closely the pixels match ground truth.</p>
+    <p class="text-xs mt-2 opacity-70">"像素完美度"</p>
+    <p class="text-sm mt-2">传统信号处理指标。测量像素与真实值的匹配程度。</p>
   </div>
 
   <div class="flex-1 glass-card border-l-4 border-purple-500">
     <h3 class="font-bold text-lg">LPIPS</h3>
-    <p class="text-xs mt-2 opacity-70">"Human Perception"</p>
-    <p class="text-sm mt-2">**Crucial Metric.** Measures how "real" it looks to a human eye. <span class="text-purple-400">Lower is better.</span></p>
+    <p class="text-xs mt-2 opacity-70">"人类感知"</p>
+    <p class="text-sm mt-2"><strong>关键指标。</strong>测量对人眼的"真实感"。<span class="text-purple-400">越低越好。</span></p>
   </div>
 
   <div class="flex-1 glass-card border-l-4 border-green-500">
     <h3 class="font-bold text-lg">FPS / Inference Time</h3>
-    <p class="text-xs mt-2 opacity-70">"Speed"</p>
-    <p class="text-sm mt-2">Time taken to generate one asset. <span class="text-green-400">Critical for real-time apps.</span></p>
+    <p class="text-xs mt-2 opacity-70">"速度"</p>
+    <p class="text-sm mt-2">生成单个资产的时间。<span class="text-green-400">实时应用的关键。</span></p>
   </div>
 
 </div>
 
 ---
 
-## layout: default
+# 对比数据：碾压竞争对手
 
-# The Data: Crushing the Competition
-
-Comparison against SOTA methods (LGM, Splatter Image, OpenLRM).
+与 SOTA 方法对比 (LGM, Splatter Image, OpenLRM)
 
 <div class="mt-10 relative">
 <div class="space-y-6 font-mono text-sm">
@@ -244,97 +284,78 @@ Comparison against SOTA methods (LGM, Splatter Image, OpenLRM).
 </div>
 
 <div class="mt-8 text-center glass-card py-4">
-<h3 class="text-2xl font-bold">Speed Advantage</h3>
-<p class="mt-2">SHARP is <span class="text-green-400 font-bold">3x faster</span> than LGM and <span class="text-green-400 font-bold">2000x faster</span> than DreamFusion.</p>
+<h3 class="text-2xl font-bold">速度优势</h3>
+<p class="mt-2">SHARP 比 LGM 快 <span class="text-green-400 font-bold">3x</span>，比 DreamFusion 快 <span class="text-green-400 font-bold">2000x</span></p>
 </div>
 
 </div>
 
 ---
+layout: center
+---
 
-## layout: center
+# 结论：全方位碾压
 
-# Why is it so strong?
-
-<div class="text-left max-w-2xl mx-auto space-y-6 mt-8">
-  <div class="flex items-start gap-4">
-    <div class="bg-cyan-500 text-black font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">1</div>
-    <div>
-      <h4 class="font-bold text-xl">Epipolar Constraints</h4>
-      <p class="opacity-80">SHARP doesn't just guess; it enforces physical laws of vision (epipolar geometry) inside the network layers.</p>
-    </div>
-  </div>
-
-  <div class="flex items-start gap-4">
-    <div class="bg-cyan-500 text-black font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">2</div>
-    <div>
-      <h4 class="font-bold text-xl">Better Training Data</h4>
-      <p class="opacity-80">Trained on a curated subset of Objaverse-XL, filtering out low-quality meshes.</p>
-    </div>
-  </div>
-
-  <div class="mt-12 text-center text-2xl font-bold animate-bounce text-cyan-300 cursor-pointer">
-    Enough numbers. Let's see the Product. ↓
-  </div>
+<div class="text-center mt-12">
+  <div class="text-6xl font-black text-cyan-400 mb-4">🏆</div>
+  <p class="text-2xl">SHARP 在质量和速度上同时领先</p>
+  <p class="mt-4 opacity-70">Enough numbers. Let's see the Product. ↓</p>
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 4. Engineering Practice
 
-### Repo Structure & Tech Stack
+<div class="text-sm">
 
-Our implementation uses `apple/ml-sharp` + Gemini 2.5 Flash.
+**Tech Stack:**
 
-**Core Tech Stack:**
+- **T2I:** Gemini 2.5 Flash (Nano Banana)
+- **3D:** Apple SHARP (Feed-Forward 3DGS)
+- **Frontend:** React Three Fiber
+- **Backend:** FastAPI + Gradio
 
-- **T2I:** Google Gemini 2.5 Flash Image (Nano Banana)
-- **3D Recon:** Apple SHARP (Feed-Forward 3DGS)
-- **Rendering:** React Three Fiber + @react-three/drei
-- **Backend:** FastAPI + Gradio (HuggingFace Space)
+</div>
 
-**Actual Project Structure:**
-
-```bash
+```bash {all} {fontSize:'10px'}
 3d-scene-generator/
 ├── backend/
-│   ├── main.py              # FastAPI entrypoint
-│   ├── app_gradio.py        # HF Space + ZeroGPU
+│   ├── main.py         # FastAPI
+│   ├── app_gradio.py   # HF Space
 │   └── services/
-│       ├── gemini_service.py  # T2I generation
-│       └── sharp_service.py   # 3DGS inference
-├── frontend/
-│   └── src/components/
-│       ├── GaussianSplatViewer.tsx
-│       └── PromptPanel.tsx
-└── hf-space/                # HuggingFace deployment
+│       ├── gemini_service.py
+│       └── sharp_service.py
+├── frontend/src/
+│   ├── GaussianSplatViewer.tsx
+│   └── PromptPanel.tsx
+└── hf-space/
 ```
 
 ::right::
 
 <div class="ml-4 h-full flex items-center justify-center">
 <div class="glass-card p-6 text-center">
-<carbon:logo-github class="text-6xl mb-4"/>
+<div class="text-6xl mb-4">🐙</div>
 <h3 class="text-xl font-bold">Open Source</h3>
-<p class="text-sm mt-2 opacity-70">Forked from apple/ml-sharp</p>
-<p class="text-xs mt-4 text-green-400">Status: Deployed</p>
+<p class="text-sm mt-2 opacity-70">ToadPresident/3d-scene-generator</p>
+<a href="https://github.com/ToadPresident/3d-scene-generator" target="_blank" class="inline-block mt-4 px-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-sm hover:bg-gray-700 transition">
+View on GitHub →
+</a>
 </div>
 </div>
 
 ---
-
 layout: center
 preload: false
-
 ---
 
 # Live Preview: 3D Scene Generator
 
 Our deployed demo on **HuggingFace Space**.
 
-<div class="w-[800px] h-[450px] border border-gray-700 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,243,255,0.2)] mt-6 bg-black flex items-center justify-center">
+<div class="w-[800px] h-[400px] border border-gray-700 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(0,243,255,0.2)] mt-6 bg-black flex items-center justify-center">
 <div class="text-center">
 <div class="text-6xl mb-4">🎨</div>
 <h3 class="text-2xl font-bold text-cyan-400">Live Demo</h3>
@@ -348,30 +369,31 @@ Our deployed demo on **HuggingFace Space**.
 <div class="mt-4 text-sm opacity-50">
 (Click to open in new tab - HF Space requires external access)
 </div>
+
 ---
 layout: two-cols
 ---
 
-# Engineering Challenges
+# Debug 经验
 
-### Debugging the "Illusion"
+### 解决 "幻觉" 问题
 
-**Problem:** Single-view reconstruction creates **"Floaters"** (artifacts) and blurs on the back side.
+**问题:** 单视角重建会产生 **"Floaters"** (伪影) 和背面模糊。
 
-**Solution:** We implemented **SceneFog + ImmersiveControls**.
+**解决方案:** 我们实现了 **SceneFog + 相机限位**
 
-- By adding fog that fades to black at edges, we hide artifacts gracefully.
-- WASD + Q/E movement with soft boundary constraints.
+- 雾效渐变到黑色，优雅隐藏边缘伪影
+- WASD + Q/E 移动，带软边界约束
 
 ::right::
 
 ```tsx
-// GaussianSplatViewer.tsx - SceneFog
+// GaussianSplatViewer.tsx
 function SceneFog() {
   const { scene } = useThree();
 
   useEffect(() => {
-    // Gradient fog hides black edges
+    // 雾效隐藏黑边
     scene.fog = new THREE.Fog(0x000000, 1.5, 4);
     scene.background = new THREE.Color(0x000000);
     return () => {
@@ -381,7 +403,7 @@ function SceneFog() {
   return null;
 }
 
-// Movement bounds
+// 移动边界
 const BOUNDS = {
   minX: -5,
   maxX: 5,
@@ -394,74 +416,109 @@ const BOUNDS = {
 
 ---
 
-layout: image-right
-image: ./images/slide13-physics.png
+# 5. Future Outlook: World Model
+
+### 从 "物体生成" 到 "世界生成"
+
+<div class="grid grid-cols-2 gap-8 mt-8">
+
+<div class="glass-card">
+<h3 class="text-cyan-400 font-bold mb-4">Fei-Fei Li 的愿景</h3>
+<p class="text-sm">"AI 必须从 '看' 转向在3D空间中 '行动'。"</p>
+<p class="text-sm mt-4 opacity-70">— Spatial Intelligence, 2024</p>
+</div>
+
+<div class="glass-card border-purple-500 border">
+<h3 class="text-purple-400 font-bold mb-4">World Labs</h3>
+<p class="text-sm"><strong>Project Marble:</strong> 一个能从各种输入生成和维护一致3D环境的 "世界模型"。</p>
+<p class="text-sm mt-4 opacity-70">基于 3D Gaussian Splatting 技术</p>
+</div>
+
+</div>
+
+<div class="mt-8 text-center">
+<p class="text-xl">World Model = 不仅模拟像素，还模拟 <strong>物理和动态</strong></p>
+</div>
 
 ---
 
-# 5. Future Outlook
+# 3DGS 的广泛应用
 
-### Toward a "World Model"
+### 不止于3D生成
 
-We have demonstrated **Object Generation**.
-The next step is **World Generation**.
+<div class="grid grid-cols-3 gap-6 mt-8">
 
-**What is a World Model?**
-An AI that simulates the physics and dynamics of reality, not just the pixels.
+<div class="glass-card text-center">
+<div class="text-4xl mb-4">🥽</div>
+<h3 class="font-bold text-lg">Apple Vision Pro</h3>
+<p class="text-sm mt-2 opacity-70">空间计算的核心技术，实现沉浸式AR体验</p>
+</div>
 
-- **Fei-Fei Li (Spatial Intelligence):** "AI must move from 'Seeing' to 'Acting' in 3D space."
-- **Project Marble:**
-  Our goal is to stitch these single objects into a coherent environment.
+<div class="glass-card text-center">
+<div class="text-4xl mb-4">🎮</div>
+<h3 class="font-bold text-lg">游戏资产生成</h3>
+<p class="text-sm mt-2 opacity-70">快速为游戏创建NPC、道具、场景</p>
+</div>
+
+<div class="glass-card text-center">
+<div class="text-4xl mb-4">🎬</div>
+<h3 class="font-bold text-lg">虚拟制片</h3>
+<p class="text-sm mt-2 opacity-70">Pre-visualization, LED Wall背景生成</p>
+</div>
+
+</div>
+
+<div class="mt-8 text-center glass-card py-4">
+<p class="text-lg">3DGS 正在成为 <strong>空间智能 (Spatial Intelligence)</strong> 的基础设施</p>
+</div>
 
 ---
 
-## layout: default
+# 未来技术：4D & Physics
 
-# Future Interactions
-
-### Beyond Static Meshes
-
-Current Limitations vs. Future Tech:
+### 从静态到动态
 
 <div class="grid grid-cols-2 gap-8 mt-10">
 
 <div class="glass-card">
-<h3 class="text-gray-400 mb-2">Current (SHARP)</h3>
+<h3 class="text-gray-400 mb-2">当前 (SHARP)</h3>
 <ul class="list-disc pl-5 space-y-2 text-sm">
-<li>Static Scenes (Frozen in time)</li>
-<li>Visual Only (No mass/friction)</li>
-<li>One Object at a time</li>
+<li>静态场景（时间冻结）</li>
+<li>仅视觉（无质量/摩擦）</li>
+<li>一次一个物体</li>
 </ul>
 </div>
 
 <div class="glass-card border-purple-500 border">
-<h3 class="text-purple-400 mb-2 font-bold">Future (4D & Physics)</h3>
+<h3 class="text-purple-400 mb-2 font-bold">未来 (4D & Physics)</h3>
 <ul class="list-disc pl-5 space-y-2 text-sm">
-<li><strong>4D Gaussian Splatting:</strong> Time-variant scenes (e.g., flowing water, fire).</li>
-<li><strong>PhysGaussian:</strong> Interactive physics (Soft body simulation, bouncing).</li>
-<li><strong>Scene Composition:</strong> Layout generation via LLMs.</li>
+<li><strong>4D Gaussian Splatting:</strong> 时变场景（流水、火焰）</li>
+<li><strong>PhysGaussian:</strong> 交互物理（软体模拟、弹跳）</li>
+<li><strong>Scene Composition:</strong> LLM 驱动的场景布局</li>
 </ul>
 </div>
 
 </div>
 
----
+<div class="mt-8 text-center">
+<p class="opacity-70">CVPR 2024: PhysGaussian 首次实现物理感知的高斯溅射</p>
+</div>
 
+---
 layout: center
 class: text-center
-
 ---
 
 # Thank You
 
 <div class="flex flex-col items-center mt-10">
 <div class="text-6xl mb-4">🚀</div>
-<h2 class="text-2xl font-bold">Deep Learning Final Project</h2>
+<h2 class="text-2xl font-bold">深度学习期末项目</h2>
 <p class="opacity-60 mt-2">Text-to-3D Instant Generation</p>
 
 <div class="mt-8 grid grid-cols-2 gap-8 text-left text-sm font-mono opacity-80">
 <div>
-<span class="text-cyan-400">>></span> Google Nano Banana
+<span class="text-cyan-400">>></span> Google Gemini 2.5 Flash
 
 <span class="text-cyan-400">>></span> Apple SHARP
 
@@ -474,7 +531,9 @@ class: text-center
 </div>
 </div>
 
-<div class="mt-10 text-xs opacity-40 italic">
-This presentation was entirely created by AI — Claude Opus on Google Antigravity. Images generated by Nano Banana.
+<div class="mt-10 text-sm opacity-60">
+<a href="https://github.com/ToadPresident/3d-scene-generator" target="_blank" class="hover:text-cyan-400 transition">
+github.com/ToadPresident/3d-scene-generator
+</a>
 </div>
 </div>
