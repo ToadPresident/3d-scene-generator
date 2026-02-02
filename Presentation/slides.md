@@ -114,8 +114,8 @@ class: text-center
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 2. Apple SHARP
 
@@ -289,8 +289,8 @@ Comparison against SOTA methods (LGM, Splatter Image, OpenLRM)
 </div>
 
 ---
-
-## layout: center
+layout: center
+---
 
 # Conclusion: Dominating All Metrics
 
@@ -301,8 +301,8 @@ Comparison against SOTA methods (LGM, Splatter Image, OpenLRM)
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 4. Engineering Practice
 
@@ -347,6 +347,7 @@ View on GitHub →
 ---
 layout: center
 preload: false
+
 ---
 
 # Live Preview: 3D Scene Generator
