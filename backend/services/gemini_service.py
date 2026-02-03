@@ -10,15 +10,17 @@ from google.genai import types
 
 
 # Model configuration with optimal regions
+# Note: gemini-3-pro-image-preview requires special access
+# Using gemini-2.5-flash-image as stable default
 MODELS = {
     "high_quality": {
-        "name": "gemini-3-pro-image-preview",  # Nano Banana Pro - best quality
-        "location": "us-central1",  # Only available globally
-        "description": "Highest quality, advanced reasoning"
+        "name": "gemini-2.5-flash-image",  # Stable, widely available
+        "location": "us-central1",
+        "description": "High quality image generation"
     },
     "fast": {
         "name": "gemini-2.5-flash-image",
-        "location": "asia-southeast1",  # Singapore - low latency
+        "location": "us-central1",
         "description": "Speed optimized, high throughput"
     }
 }
