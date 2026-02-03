@@ -138,7 +138,16 @@ API key is provided by users via `X-API-Key` header (BYOK pattern).
 
 ## 📝 License
 
-MIT License - see [LICENSE](LICENSE)
+This project's source code is licensed under the MIT License - see [LICENSE](LICENSE).
+
+### ⚠️ Important: Apple SHARP Model License
+
+The Apple SHARP model weights are subject to [Apple's Machine Learning Research Model License Agreement](https://github.com/apple/ml-sharp/blob/main/LICENSE_MODEL), which restricts usage to **research purposes only**. Commercial use of the model weights is not permitted.
+
+| Component                 | License                   | Commercial Use   |
+| ------------------------- | ------------------------- | ---------------- |
+| This project's code       | MIT                       | ✅ Allowed       |
+| Apple SHARP model weights | Apple ML Research License | ❌ Research only |
 
 ---
 
