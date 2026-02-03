@@ -1,17 +1,37 @@
 """
-Apple SHARP Service
+Apple SHARP Service - MPS Optimized
 Converts single images to 3D Gaussian Splatting via SHARP CLI.
 
 Note: This requires the conda environment with SHARP to be activated before running uvicorn.
 Run: conda activate 3d-scene-gen
+
+MPS Acceleration: On Apple Silicon, enables PyTorch MPS fallback for GPU acceleration.
 """
 
 import asyncio
 import subprocess
 import shutil
 import os
+import platform
 from pathlib import Path
 from typing import Optional
+
+
+def configure_mps_environment() -> dict:
+    """
+    Configure environment variables for Apple Silicon MPS acceleration.
+    
+    Returns:
+        Environment dict with MPS settings if on Apple Silicon
+    """
+    env = os.environ.copy()
+    
+    if platform.system() == "Darwin" and platform.machine() == "arm64":
+        # Apple Silicon - enable MPS with CPU fallback for unsupported ops
+        env["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+        print("🍎 Apple Silicon detected - MPS fallback enabled")
+    
+    return env
 
 
 def check_sharp_available() -> bool:
@@ -85,11 +105,13 @@ async def generate_3d_scene(image_path: str, output_dir: str) -> Optional[str]:
         timeout = 120  # 2 minutes for subsequent runs
     
     # Run in thread pool to avoid blocking async event loop
+    # Use MPS-configured environment for Apple Silicon acceleration
+    env = configure_mps_environment()
     loop = asyncio.get_event_loop()
     try:
         result = await loop.run_in_executor(
             None,
-            lambda: subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+            lambda: subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
         )
     except subprocess.TimeoutExpired:
         if is_first_run:
