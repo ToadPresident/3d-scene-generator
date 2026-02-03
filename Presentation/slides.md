@@ -89,6 +89,7 @@ The first traditional approach to 3D reconstruction: scanning from the real worl
 ---
 layout: center
 class: text-center
+background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)
 ---
 
 # The Revolution: Feed-Forward
@@ -114,8 +115,8 @@ class: text-center
 </div>
 
 ---
-layout: two-cols
----
+
+## layout: two-cols
 
 # 2. Apple SHARP
 
@@ -290,6 +291,8 @@ Comparison against SOTA methods (LGM, Splatter Image, OpenLRM)
 
 ---
 layout: center
+class: text-center
+background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%)
 ---
 
 # Conclusion: Dominating All Metrics
@@ -301,8 +304,8 @@ layout: center
 </div>
 
 ---
-layout: two-cols
----
+
+## layout: two-cols
 
 # 4. Engineering Practice
 
@@ -413,6 +416,9 @@ const BOUNDS = {
 ```
 
 ---
+layout: image-left
+image: ./images/slide-future-world.png
+---
 
 # 5. Future Outlook: World Model
 
@@ -503,6 +509,7 @@ const BOUNDS = {
 ---
 layout: center
 class: text-center
+background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #2a2a4e 100%)
 ---
 
 # Thank You
