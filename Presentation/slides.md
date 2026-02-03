@@ -32,6 +32,7 @@ title: Instant World Creation
 ---
 layout: image-right
 image: ./images/slide2-studio.png
+
 ---
 
 <div class="ml-4">
@@ -90,6 +91,7 @@ The first traditional approach to 3D reconstruction: scanning from the real worl
 layout: center
 class: text-center
 background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)
+
 ---
 
 # The Revolution: Feed-Forward
@@ -115,8 +117,8 @@ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 2. Apple SHARP
 
@@ -208,6 +210,7 @@ Unlike NeRF (which "memorizes" scenes), SHARP **"understands"** geometry.
 ---
 layout: image-right
 image: ./images/slide4-architecture.png
+
 ---
 
 # Capabilities & Analogy
@@ -293,6 +296,7 @@ Comparison against SOTA methods (LGM, Splatter Image, OpenLRM)
 layout: center
 class: text-center
 background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%)
+
 ---
 
 # Conclusion: Dominating All Metrics
@@ -304,8 +308,8 @@ background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%)
 </div>
 
 ---
-
-## layout: two-cols
+layout: two-cols
+---
 
 # 4. Engineering Practice
 
@@ -418,6 +422,7 @@ const BOUNDS = {
 ---
 layout: image-left
 image: ./images/slide-future-world.png
+
 ---
 
 # 5. Future Outlook: World Model
@@ -510,6 +515,7 @@ image: ./images/slide-future-world.png
 layout: center
 class: text-center
 background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #2a2a4e 100%)
+
 ---
 
 # Thank You
